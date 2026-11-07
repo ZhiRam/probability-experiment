@@ -1,0 +1,3216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050506">
+<meta name="description" content="一个概率实验：用一个抛硬币游戏，把平均、波动、大数定律、复利、吸收壁与凯利公式放在同一条时间线上。">
+<title>一个看起来稳赚的游戏，为什么大多数人还是输了？｜一个概率实验</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%23ff4a3d'/%3E%3C/svg%3E">
+<style>
+  /* ============ foundation ============ */
+  :root {
+    --bg: #050506;
+    --fg: #f4f1ea;
+    --muted: rgba(244, 241, 234, .52);
+    --faint: rgba(244, 241, 234, .28);
+    --line: rgba(244, 241, 234, .13);
+    --red: #ff4a3d;
+    --red-deep: #c8321f;
+    --paper: #f2efe8;
+    --ink: #0a0a0a;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono: "Cascadia Mono", "SF Mono", "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--bg);
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    transition: background .8s ease;
+  }
+
+  body.light { background: var(--paper); }
+
+  ::selection { background: rgba(255, 74, 61, .25); }
+
+  a { color: inherit; text-decoration: none; }
+
+  button { font: inherit; }
+
+  /* ============ fixed chrome ============ */
+  .hud {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 60;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 26px 38px;
+    color: var(--fg);
+    transition: color .6s ease, opacity 1s ease;
+    pointer-events: none;
+  }
+
+  body.light .hud { color: var(--ink); }
+  body.off .hud { opacity: 0; }
+
+  .brand { display: flex; align-items: center; gap: 14px; }
+
+  .logo {
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -.03em;
+    line-height: 1;
+  }
+
+  .logo .dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    margin-left: 3px;
+    border-radius: 50%;
+    background: var(--red);
+    vertical-align: 7px;
+  }
+
+  .hud-meta {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  body.light .hud-meta { color: rgba(10, 10, 10, .45); }
+
+  .chapter {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  body.light .chapter { color: rgba(10, 10, 10, .45); }
+
+  .chapter strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: .02em;
+    color: var(--fg);
+  }
+
+  body.light .chapter strong { color: var(--ink); }
+
+  .side-nav {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    transition: opacity 1s ease;
+  }
+
+  body.off .side-nav { opacity: 0; pointer-events: none; }
+
+  .side-nav a {
+    position: relative;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: rgba(244, 241, 234, .26);
+    transition: height .35s var(--ease), background .35s ease, box-shadow .35s ease;
+  }
+
+  .side-nav a.active {
+    height: 22px;
+    border-radius: 3px;
+    background: var(--red);
+    box-shadow: 0 0 14px rgba(255, 74, 61, .55);
+  }
+
+  .side-nav a::after {
+    content: attr(data-label);
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%) translateX(8px);
+    opacity: 0;
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .14em;
+    color: var(--muted);
+    transition: opacity .3s ease, transform .3s var(--ease);
+  }
+
+  .side-nav a:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+
+  body.light .side-nav a { background: rgba(10, 10, 10, .22); }
+  body.light .side-nav a.active { background: var(--red); }
+
+  .progress {
+    position: fixed;
+    left: 0; bottom: 0;
+    width: 100%; height: 1px;
+    z-index: 60;
+    background: rgba(244, 241, 234, .1);
+    transition: background .6s ease, opacity 1s ease;
+  }
+
+  body.light .progress { background: rgba(10, 10, 10, .1); }
+  body.off .progress { opacity: 0; }
+
+  .progress span {
+    display: block;
+    width: 100%; height: 100%;
+    background: var(--red);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    will-change: transform;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    pointer-events: none;
+    opacity: .028;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 54;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 48%, rgba(0, 0, 0, .55) 100%);
+    opacity: .55;
+    transition: opacity .8s ease;
+  }
+
+  body.light .vignette { opacity: .12; }
+  body.off .vignette { opacity: .2; }
+
+  /* ============ type ============ */
+  .eyebrow {
+    margin: 0 0 22px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .26em;
+    text-transform: uppercase;
+    color: var(--red);
+    line-height: 1.6;
+  }
+
+  .light .eyebrow { color: var(--red-deep); }
+
+  h1, h2, h3 { margin: 0; }
+
+  .display {
+    font-size: clamp(2.8rem, 7.8vw, 8.6rem);
+    font-weight: 500;
+    line-height: 1.04;
+    letter-spacing: -.045em;
+  }
+
+  h2 {
+    font-size: clamp(2rem, 4.8vw, 4.8rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -.035em;
+  }
+
+  .light h2 { color: var(--ink); }
+
+  .lead {
+    margin: 28px 0 0;
+    max-width: 34em;
+    font-size: clamp(.98rem, 1.25vw, 1.12rem);
+    line-height: 1.75;
+    color: var(--muted);
+  }
+
+  .light .lead { color: rgba(10, 10, 10, .58); }
+
+  .mono {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+  }
+
+  .inner {
+    position: relative;
+    width: min(1440px, calc(100% - 96px));
+    margin: 0 auto;
+  }
+
+  /* ============ scenes ============ */
+  .scene {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .scene-hero { overflow: clip; }
+
+  .scene .inner {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 13vh 0 9vh;
+  }
+
+  /* ============ hero ============ */
+  .hero-inner { justify-content: flex-end !important; padding-bottom: 11vh !important; }
+
+  .hero-sub {
+    margin: 34px 0 0;
+    font-size: clamp(.9rem, 1.15vw, 1.05rem);
+    color: var(--muted);
+    letter-spacing: .01em;
+  }
+
+  .ghost {
+    position: absolute;
+    right: -3vw;
+    top: 4vh;
+    z-index: 0;
+    font-size: clamp(12rem, 36vw, 36rem);
+    font-weight: 200;
+    line-height: .78;
+    letter-spacing: -.07em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(244, 241, 234, .055);
+    pointer-events: none;
+    user-select: none;
+    animation: ghost-drift 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes ghost-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-2vw, 1.5vh, 0); }
+  }
+
+  .scroll-cue {
+    position: absolute;
+    right: 5vw;
+    bottom: 5.5vh;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .26em;
+    color: var(--muted);
+  }
+
+  .scroll-cue i {
+    display: block;
+    width: 1px; height: 46px;
+    background: linear-gradient(var(--muted), transparent);
+    animation: cue 2.4s ease-in-out infinite;
+    transform-origin: top;
+  }
+
+  @keyframes cue {
+    0%, 100% { transform: scaleY(.35); opacity: .4; }
+    50% { transform: scaleY(1); opacity: .9; }
+  }
+
+  .line-mask { display: block; overflow: hidden; padding-bottom: .08em; }
+
+  .line-mask > span {
+    display: block;
+    transform: translateY(112%);
+    transition: transform 1.25s var(--ease);
+  }
+
+  .scene.is-in .line-mask > span { transform: translateY(0); }
+  .line-mask:nth-child(2) > span { transition-delay: .12s; }
+
+  /* ============ preface ============ */
+  .preface {
+    position: relative;
+    overflow: hidden;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .preface-ghost {
+    position: absolute;
+    top: 20vh;
+    right: 2vw;
+    z-index: 0;
+    font-size: 9vw;
+    font-weight: 200;
+    line-height: .8;
+    letter-spacing: -.05em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(200, 50, 31, .18);
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .preface-inner {
+    position: relative;
+    z-index: 1;
+    justify-content: space-between;
+    padding: 12vh 0 6vh;
+  }
+
+  .preface-kicker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(10, 10, 10, .16);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(10, 10, 10, .48);
+  }
+
+  .preface-start {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    padding: 13px 24px;
+    border-radius: 999px;
+    background: var(--red-deep);
+    color: #fff;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 10px 28px rgba(200, 50, 31, .22);
+    transition: background .3s ease, transform .3s var(--ease), box-shadow .3s ease;
+  }
+
+  .preface-start:hover {
+    background: var(--red);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(200, 50, 31, .3);
+  }
+
+  .start-arrow {
+    display: inline-block;
+    font-size: 14px;
+    animation: start-bob 2.2s ease-in-out infinite;
+  }
+
+  @keyframes start-bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(3px); }
+  }
+
+  .preface-kicker > span:first-child { color: var(--red-deep); }
+
+  .preface-title {
+    margin: 4vh 0 0;
+    max-width: 14em;
+    font-size: clamp(2.4rem, 6vw, 6rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -.04em;
+  }
+
+  .preface-title em {
+    font-style: normal;
+    color: var(--red-deep);
+  }
+
+  .preface-body {
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    gap: 5vw;
+    max-width: 1100px;
+    margin: 4vh 0 0;
+  }
+
+  .preface-body p {
+    margin: 0 0 1em;
+    font-size: .9rem;
+    line-height: 1.95;
+    color: rgba(10, 10, 10, .58);
+  }
+
+  .preface-strong {
+    margin: 0 !important;
+    font-family: var(--serif);
+    font-size: clamp(1.08rem, 1.7vw, 1.4rem) !important;
+    line-height: 1.7 !important;
+    color: var(--ink) !important;
+  }
+
+  .preface-small {
+    margin: 1.3em 0 0 !important;
+    font-size: .76rem !important;
+    line-height: 1.8 !important;
+    color: rgba(10, 10, 10, .42) !important;
+  }
+
+  .preface-route {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 4vh;
+    border-top: 1px solid rgba(10, 10, 10, .16);
+  }
+
+  .preface-route .step {
+    padding: 14px 20px 12px 0;
+    border-right: 1px solid rgba(10, 10, 10, .12);
+    border-bottom: 1px solid rgba(10, 10, 10, .12);
+  }
+
+  .preface-route .step:nth-child(3n) { border-right: 0; }
+  .preface-route .step:nth-child(n+4) { border-bottom: 0; }
+
+  .preface-route .num {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .14em;
+    color: var(--red-deep);
+  }
+
+  .preface-route .name {
+    margin: 7px 0 4px;
+    font-size: .95rem;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .preface-route .desc {
+    margin: 0;
+    min-height: 2.6em;
+    font-size: .74rem;
+    line-height: 1.7;
+    color: rgba(10, 10, 10, .45);
+  }
+
+  .preface-route .meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 7px;
+    letter-spacing: .08em;
+    color: rgba(10, 10, 10, .38);
+  }
+
+  .preface-route .meta span:last-child {
+    color: var(--red-deep);
+    white-space: nowrap;
+  }
+
+  .preface-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-top: 4vh;
+  }
+
+  .preface-note {
+    margin: 0;
+    font-size: .72rem;
+    line-height: 1.8;
+    color: rgba(10, 10, 10, .4);
+  }
+
+  /* ============ game ============ */
+  .game-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6vw;
+    align-items: center;
+    flex: 1;
+  }
+
+  .game-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3.2vh;
+  }
+
+  .coin-wrap {
+    position: relative;
+    perspective: 1000px;
+    display: grid;
+    place-items: center;
+  }
+
+  .coin-wrap::before {
+    content: "";
+    position: absolute;
+    width: 78%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 74, 61, .14), transparent 66%);
+    filter: blur(16px);
+  }
+
+  .coin {
+    position: relative;
+    width: clamp(210px, 21vw, 310px);
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 50%;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    background: radial-gradient(circle at 31% 26%, #fcf9f2, #d6d1c8 40%, #918c83 72%, #4b4843 100%);
+    box-shadow:
+      inset 0 0 60px rgba(0, 0, 0, .34),
+      inset 0 2px 3px rgba(255, 255, 255, .7),
+      0 40px 90px rgba(0, 0, 0, .6);
+    transition: transform .4s var(--ease);
+  }
+
+  .coin:hover { transform: scale(1.015); }
+
+  .coin::before {
+    content: "";
+    position: absolute;
+    inset: 9%;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, .16);
+    box-shadow: inset 0 0 30px rgba(255, 255, 255, .16);
+  }
+
+  .coin::after {
+    content: "";
+    position: absolute;
+    inset: 3%;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .28);
+  }
+
+  .coin-value {
+    position: relative;
+    font-size: clamp(2.4rem, 4.4vw, 4.2rem);
+    font-weight: 300;
+    letter-spacing: -.05em;
+    color: #1b1a18;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .coin-sub {
+    position: absolute;
+    bottom: 16%;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .32em;
+    color: rgba(20, 19, 17, .5);
+  }
+
+  .coin.spin { animation: coin-spin .72s cubic-bezier(.22, .8, .22, 1); }
+
+  @keyframes coin-spin {
+    0% { transform: rotateY(0deg) scale(1); }
+    45% { transform: rotateY(520deg) scale(.94); filter: blur(1.4px); }
+    100% { transform: rotateY(720deg) scale(1); }
+  }
+
+  .game-data { width: min(430px, 100%); }
+
+  .readout {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 15px 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .readout:last-of-type { border-bottom: 1px solid var(--line); }
+
+  .readout .label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .readout .value {
+    font-size: clamp(1.9rem, 3.2vw, 2.9rem);
+    font-weight: 200;
+    letter-spacing: -.045em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .spark {
+    display: block;
+    width: 100%;
+    height: 62px;
+    margin: 18px 0 2px;
+    overflow: visible;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .game-note {
+    margin: 18px 0 0;
+    min-height: 3.4em;
+    font-size: .82rem;
+    line-height: 1.75;
+    color: var(--muted);
+  }
+
+  .game-note em {
+    font-style: normal;
+    color: var(--red);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .game-note span {
+    display: block;
+    margin-top: 3px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .08em;
+    color: var(--faint);
+  }
+
+  /* ============ buttons ============ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    padding: 12px 22px;
+    border: 1px solid rgba(244, 241, 234, .26);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--fg);
+    font-size: 12px;
+    letter-spacing: .07em;
+    cursor: pointer;
+    transition: background .3s ease, border-color .3s ease, color .3s ease, transform .3s var(--ease);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn:hover {
+    background: var(--fg);
+    border-color: var(--fg);
+    color: var(--bg);
+    transform: translateY(-1px);
+  }
+
+  .btn:active { transform: translateY(0); }
+
+  .btn.btn-ghost {
+    border-color: rgba(244, 241, 234, .14);
+    color: var(--muted);
+  }
+
+  .btn.btn-ghost:hover {
+    background: rgba(244, 241, 234, .08);
+    border-color: rgba(244, 241, 234, .3);
+    color: var(--fg);
+  }
+
+  .btn.link {
+    border-color: transparent;
+    color: var(--faint);
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  .btn.link:hover { background: transparent; color: var(--muted); }
+
+  .light .btn { border-color: rgba(10, 10, 10, .24); color: var(--ink); }
+  .light .btn:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+  .btn.red {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  .btn.red:hover { background: #ff6155; border-color: #ff6155; color: #fff; }
+
+  /* ============ lives / pinned canvas ============ */
+  .pin-wrap {
+    height: 300vh;
+    height: 300svh;
+  }
+
+  .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+  }
+
+  .lives-stage { position: absolute; inset: 0; }
+
+  .lives-stage {
+    background: radial-gradient(900px 520px at 46% 54%, rgba(244, 241, 234, .02), transparent 72%);
+  }
+
+  .lives-stage canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+  }
+
+  .lives-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      rgba(5, 5, 6, .92) 0%,
+      rgba(5, 5, 6, .42) 24%,
+      transparent 46%,
+      transparent 76%,
+      rgba(5, 5, 6, .9) 100%
+    );
+  }
+
+  .lives-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(5, 5, 6, .86) 0%, rgba(5, 5, 6, .4) 32%, transparent 58%);
+  }
+
+  .lives-top {
+    position: absolute;
+    top: 13vh;
+    left: 6vw;
+    z-index: 3;
+    max-width: min(760px, 66vw);
+  }
+
+  .lives-top h2 {
+    font-size: clamp(1.9rem, 4.1vw, 4.1rem);
+    line-height: 1.08;
+  }
+
+  .lives-sub {
+    margin: 18px 0 0;
+    font-size: .88rem;
+    color: var(--muted);
+  }
+
+  .time-readout {
+    position: absolute;
+    top: 13vh;
+    right: 6vw;
+    z-index: 3;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: var(--muted);
+  }
+
+  .lives-legend {
+    position: absolute;
+    top: 18vh;
+    right: 6vw;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .12em;
+    color: var(--muted);
+  }
+
+  .lives-legend span { display: flex; align-items: center; gap: 9px; }
+
+  .lg-line { display: inline-block; width: 16px; height: 1px; }
+  .lg-line.mean { height: 2px; background: var(--red); }
+  .lg-line.median { background: rgba(244, 241, 234, .55); }
+  .lg-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+
+  .wipe {
+    position: absolute;
+    top: 12%;
+    bottom: 16%;
+    left: 6%;
+    width: 1px;
+    z-index: 2;
+    background: var(--red);
+    box-shadow: 0 0 20px rgba(255, 74, 61, .9);
+    pointer-events: none;
+    opacity: .85;
+    transition: opacity .6s ease;
+  }
+
+  .lives.complete .wipe { opacity: 0; }
+
+  .lives-axis {
+    position: absolute;
+    left: 2.4vw;
+    top: 0;
+    height: 100%;
+    z-index: 3;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .06em;
+    color: rgba(244, 241, 234, .45);
+    pointer-events: none;
+  }
+
+  .lives-axis span {
+    position: absolute;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+
+  .lives-bottom {
+    position: absolute;
+    left: 6vw;
+    right: 6vw;
+    bottom: 6.5vh;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 28px;
+    opacity: 0;
+    transform: translateY(22px);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity .9s ease, transform .9s var(--ease), visibility .9s;
+  }
+
+  .lives.complete .lives-bottom { opacity: 1; transform: none; pointer-events: auto; visibility: visible; }
+
+  .live-stats { display: flex; gap: 42px; }
+
+  .live-stats span {
+    display: block;
+    margin-bottom: 5px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .live-stats strong {
+    font-size: clamp(1.2rem, 1.9vw, 1.5rem);
+    font-weight: 300;
+    letter-spacing: -.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lives-controls { text-align: right; }
+
+  .path-caption {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .04em;
+    color: var(--muted);
+    min-height: 2.6em;
+  }
+
+  /* ============ split ============ */
+  .split {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .split .inner {
+    display: grid;
+    grid-template-columns: 4.6fr 7.4fr;
+    gap: 4vw;
+    align-content: center;
+    padding: 14vh 0 12vh;
+  }
+
+  .split-nums {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2.2vw;
+  }
+
+  .num-label {
+    display: block;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(10, 10, 10, .48);
+  }
+
+  .giant {
+    display: block;
+    font-size: clamp(3.4rem, 8vw, 8rem);
+    font-weight: 200;
+    line-height: .9;
+    letter-spacing: -.06em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .giant.red { color: var(--red-deep); }
+
+  .num-sep {
+    font-size: clamp(2rem, 4vw, 4rem);
+    font-weight: 200;
+    color: rgba(10, 10, 10, .18);
+    transform: translateY(-6px);
+  }
+
+  .gap-line {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-top: 3.5vh;
+  }
+
+  .gap-line .rule {
+    flex: 1;
+    height: 1px;
+    background: rgba(10, 10, 10, .16);
+  }
+
+  .gap-line p {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: rgba(10, 10, 10, .55);
+    white-space: nowrap;
+  }
+
+  .gap-line em {
+    font-style: normal;
+    color: var(--red-deep);
+    font-size: 1.3em;
+  }
+
+  .three-lives {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    margin-top: 5vh;
+    border: 1px solid rgba(10, 10, 10, .14);
+    background: rgba(10, 10, 10, .14);
+  }
+
+  .three-lives > div {
+    position: relative;
+    padding: 22px 22px 20px;
+    background: var(--paper);
+    overflow: hidden;
+    transition: background .35s ease;
+  }
+
+  .three-lives > div:hover { background: #e9e5db; }
+
+  .three-lives .tl-head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .12em;
+    color: rgba(10, 10, 10, .45);
+  }
+
+  .three-lives .tl-num {
+    display: block;
+    margin: 14px 0 4px;
+    font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+    font-weight: 300;
+    letter-spacing: -.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .three-lives .tl-note { font-size: .74rem; color: rgba(10, 10, 10, .5); }
+
+  .three-lives svg { display: block; width: 100%; height: 34px; margin-top: 14px; }
+
+  .split-note {
+    grid-column: 1 / -1;
+    max-width: 780px;
+    margin: 5vh 0 0;
+    font-size: .86rem;
+    line-height: 1.9;
+    color: rgba(10, 10, 10, .55);
+  }
+
+  .split-note b { color: var(--ink); font-weight: 500; }
+
+  .history-note {
+    grid-column: 1 / -1;
+    margin: 4vh 0 0;
+    padding-top: 20px;
+    border-top: 1px solid rgba(10, 10, 10, .14);
+    max-width: 820px;
+    font-size: .78rem;
+    line-height: 1.9;
+    color: rgba(10, 10, 10, .45);
+  }
+
+  /* ============ lever ============ */
+  .lever-grid {
+    display: grid;
+    grid-template-columns: 4.8fr 7.2fr;
+    gap: 4.5vw;
+    align-items: center;
+    flex: 1;
+  }
+
+  .lever-readout {
+    display: flex;
+    gap: 44px;
+    margin: 4vh 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .lever-readout span {
+    display: block;
+    margin-bottom: 6px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .lever-readout strong {
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    font-weight: 200;
+    letter-spacing: -.04em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 3.2vh;
+  }
+
+  .preset {
+    padding: 9px 16px;
+    border: 1px solid rgba(244, 241, 234, .16);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: all .3s ease;
+  }
+
+  .preset:hover { border-color: rgba(244, 241, 234, .4); color: var(--fg); }
+
+  .preset.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+
+  .lever-viz {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  #kellyChart { width: 100%; height: auto; display: block; overflow: visible; }
+
+  #kellyCurve {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1.8s var(--ease);
+  }
+
+  .lever.is-in #kellyCurve { stroke-dashoffset: 0; }
+
+  #kellyNeg { opacity: 0; transition: opacity 1.2s ease .6s; }
+  .lever.is-in #kellyNeg { opacity: 1; }
+
+  #kellyDot { opacity: 0; transition: opacity .8s ease 1.2s; }
+  .lever.is-in #kellyDot { opacity: 1; }
+
+  .chart-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    fill: rgba(244, 241, 234, .42);
+  }
+
+  .chart-label.red { fill: var(--red); }
+
+  .slider-wrap { margin-top: 4px; }
+
+  .slider-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .slider-head strong {
+    font-family: var(--sans);
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: -.03em;
+    color: var(--red);
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    margin: 6px 0 0;
+    border-radius: 2px;
+    background: rgba(244, 241, 234, .18);
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--red), 0 0 24px rgba(255, 74, 61, .55);
+    cursor: grab;
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--red);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--red);
+    cursor: grab;
+  }
+
+  input[type="range"]:active::-webkit-slider-thumb { cursor: grabbing; }
+  input[type="range"]:focus-visible { outline: 2px solid var(--red); outline-offset: 8px; }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .08em;
+    color: var(--faint);
+  }
+
+  .lever-strip {
+    position: relative;
+    margin-top: 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .lever-strip-label {
+    margin: 0 0 8px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .14em;
+    color: var(--faint);
+  }
+
+  #leverPaths { display: block; width: 100%; height: 150px; }
+
+  .lever-caption {
+    margin: 16px 0 0;
+    min-height: 2.8em;
+    font-size: .8rem;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .lever-formula {
+    margin: 4vh 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--faint);
+  }
+
+  .lever-close {
+    margin: 4vh 0 0;
+    max-width: 34em;
+    font-size: .9rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .lever-close b { color: var(--fg); font-weight: 400; }
+
+  /* ============ barriers ============ */
+  .barriers {
+    height: 340vh;
+    height: 340svh;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .barriers .pin {
+    display: flex;
+    flex-direction: column;
+    padding-top: 12vh;
+  }
+
+  .barriers-head {
+    width: min(1440px, calc(100% - 96px));
+    margin: 0 auto;
+    flex: 0 0 auto;
+  }
+
+  .barriers-head h2 { font-size: clamp(2rem, 4.4vw, 4.4rem); }
+
+  .barriers-viewport {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1081px) {
+    .barriers-viewport {
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 4.5%, #000 95.5%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0%, #000 4.5%, #000 95.5%, transparent 100%);
+    }
+  }
+
+  .barriers-track {
+    display: flex;
+    gap: 22px;
+    padding: 0 6vw;
+    will-change: transform;
+  }
+
+  .barrier-card {
+    position: relative;
+    flex: 0 0 clamp(300px, 27vw, 370px);
+    height: clamp(380px, 48vh, 470px);
+    padding: 26px;
+    background: #0a0a0a;
+    color: var(--paper);
+    border: 1px solid rgba(255, 255, 255, .08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform .5s var(--ease), border-color .5s ease;
+  }
+
+  .barrier-card:hover {
+    transform: translateY(-9px);
+    border-color: rgba(255, 74, 61, .42);
+  }
+
+  .card-index {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    color: var(--red);
+  }
+
+  .barrier-card h3 {
+    margin: 16px 0 22px;
+    font-size: 1.9rem;
+    font-weight: 400;
+    letter-spacing: -.02em;
+  }
+
+  .card-expect,
+  .card-wall {
+    margin: 0 0 9px;
+    font-size: .78rem;
+    line-height: 1.7;
+    color: rgba(242, 239, 232, .48);
+  }
+
+  .card-wall b { color: var(--red); font-weight: 400; }
+
+  .card-copy {
+    margin: auto 0 74px;
+    font-size: .86rem;
+    line-height: 1.8;
+    color: rgba(242, 239, 232, .86);
+  }
+
+  .card-line {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    width: 100%;
+    height: 96px;
+    opacity: .55;
+    transition: opacity .5s ease;
+  }
+
+  .barrier-card:hover .card-line { opacity: 1; }
+
+  .barriers-foot {
+    width: min(1440px, calc(100% - 96px));
+    margin: 0 auto;
+    padding: 0 0 4.5vh;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .16em;
+    color: rgba(10, 10, 10, .45);
+  }
+
+  .barriers-foot .bar {
+    flex: 1;
+    height: 1px;
+    background: rgba(10, 10, 10, .14);
+    overflow: hidden;
+  }
+
+  .barriers-foot .bar span {
+    display: block;
+    width: 100%; height: 100%;
+    background: var(--red-deep);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  /* ============ statistic ============ */
+  .stat-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .3;
+    transition: opacity 1.2s ease;
+  }
+
+  .stat-inner {
+    position: relative;
+    z-index: 2;
+    align-items: center;
+    text-align: center;
+  }
+
+  .stat-inner h2 { max-width: 1100px; }
+
+  .stat-copy {
+    max-width: 640px;
+    margin: 3.5vh auto 0;
+  }
+
+  .stat-copy p {
+    margin: 0 0 1.2em;
+    font-size: .96rem;
+    line-height: 1.9;
+    color: var(--muted);
+  }
+
+  .btn-shutdown {
+    margin-top: 4vh;
+    padding: 17px 42px;
+    font-size: 13px;
+    letter-spacing: .12em;
+    border-color: rgba(255, 74, 61, .55);
+    color: var(--red);
+  }
+
+  .btn-shutdown:hover {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+    box-shadow: 0 0 50px rgba(255, 74, 61, .28);
+  }
+
+  body.off .stat-bg { opacity: 0; }
+
+  /* ============ end ============ */
+  .end {
+    background: var(--bg);
+    color: var(--fg);
+  }
+
+  .end-inner { justify-content: center !important; }
+
+  .end-title {
+    font-size: clamp(2.9rem, 8.3vw, 8.3rem);
+    font-weight: 500;
+    line-height: 1.06;
+    letter-spacing: -.045em;
+    margin: 0;
+  }
+
+  .end-title em { font-style: normal; color: var(--red); }
+
+  .end-sub {
+    margin: 3.4vh 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .24em;
+    color: var(--muted);
+  }
+
+  .end-foot {
+    position: absolute;
+    left: 6vw;
+    right: 6vw;
+    bottom: 4.4vh;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .14em;
+    color: var(--faint);
+  }
+
+  .end-foot a {
+    position: relative;
+    color: var(--muted);
+    transition: color .3s ease;
+  }
+
+  .end-foot a:hover { color: var(--red); }
+
+  /* ============ reveal ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s ease, transform 1.1s var(--ease);
+    transition-delay: var(--d, 0s);
+  }
+
+  .scene.is-in .reveal { opacity: 1; transform: none; }
+
+  /* ============ responsive ============ */
+  @media (max-width: 1080px) {
+    .inner { width: calc(100% - 64px); }
+
+    .game-grid { grid-template-columns: 1fr; gap: 5vh; }
+
+    .lever-grid { grid-template-columns: 1fr; gap: 6vh; }
+
+    .split .inner { grid-template-columns: 1fr; gap: 5vh; padding: 12vh 0; }
+
+    .split-nums { justify-content: flex-start; }
+
+    .num-sep { display: none; }
+
+    .three-lives { grid-template-columns: 1fr; }
+
+    .barriers {
+      height: auto;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .barriers .pin {
+      position: relative;
+      height: auto;
+      min-height: 100vh;
+      min-height: 100svh;
+      padding-bottom: 6vh;
+    }
+
+    .barriers-viewport {
+      overflow-x: auto;
+      overflow-y: hidden;
+      align-items: center;
+      padding: 5vh 0 2vh;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .barriers-viewport::-webkit-scrollbar { display: none; }
+
+    .barriers-track {
+      transform: none !important;
+      padding: 0 6vw;
+    }
+
+    .barrier-card {
+      scroll-snap-align: start;
+      flex-basis: 76vw;
+      height: 430px;
+    }
+
+    .barriers-foot { display: none; }
+
+    .side-nav { display: none; }
+
+    .hud { padding: 20px 24px; }
+
+    .hud-meta { display: none; }
+  }
+
+  @media (max-width: 720px) {
+    body { font-size: 15px; }
+
+    .inner { width: calc(100% - 48px); }
+
+    .scene .inner { padding: 11vh 0 7vh; }
+
+    .display { font-size: clamp(2rem, 9.2vw, 3rem); }
+
+    h2 { font-size: clamp(1.8rem, 8vw, 2.8rem); }
+
+    .hero-sub { margin-top: 24px; }
+
+    .ghost { font-size: 56vw; right: -8vw; top: 10vh; }
+
+    .scroll-cue { display: none; }
+
+    .preface-inner { padding: 10vh 0 7vh; }
+
+    .preface-kicker {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+
+    .preface-start {
+      width: 100%;
+      margin-top: 8px;
+    }
+
+    .preface-ghost { display: none; }
+
+    .preface-title {
+      margin-top: 4vh;
+      font-size: clamp(2rem, 8.6vw, 3.2rem);
+    }
+
+    .preface-body {
+      grid-template-columns: 1fr;
+      gap: 0;
+      margin-top: 3vh;
+    }
+
+    .preface-body p { font-size: .86rem; }
+
+    .preface-route {
+      grid-template-columns: 1fr;
+      margin-top: 4vh;
+    }
+
+    .preface-route .step {
+      padding: 14px 0;
+      border-right: 0;
+      border-bottom: 1px solid rgba(10, 10, 10, .12);
+    }
+
+    .preface-route .step:nth-child(n+4) { border-bottom: 1px solid rgba(10, 10, 10, .12); }
+    .preface-route .step:last-child { border-bottom: 0; }
+
+    .preface-foot {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 18px;
+      margin-top: 4vh;
+    }
+
+    .lives-top {
+      top: 10vh;
+      left: 24px;
+      right: 24px;
+      max-width: none;
+    }
+
+    .lives-top h2 { font-size: clamp(1.6rem, 7.6vw, 2.4rem); }
+
+    .time-readout { display: none; }
+
+    .lives-axis { display: none; }
+
+    .lives-legend { display: none; }
+
+    .lives-bottom {
+      left: 24px;
+      right: 24px;
+      bottom: 4.5vh;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 22px;
+    }
+
+    .lives-controls { text-align: left; }
+
+    .live-stats { gap: 26px; flex-wrap: wrap; }
+
+    .wipe { top: 10%; bottom: 24%; }
+
+    .split-nums { flex-direction: column; align-items: flex-start; gap: 26px; }
+
+    .giant { font-size: 19vw; }
+
+    .gap-line { margin-top: 4vh; }
+
+    .gap-line p { font-size: 8px; }
+
+    .three-lives > div { padding: 18px; }
+
+    .split-note { margin-top: 4vh; }
+
+    .lever-readout { gap: 26px; }
+
+    .lever-readout strong { font-size: 1.4rem; }
+
+    .lever-strip { margin-top: 16px; }
+
+    #leverPaths { height: 120px; }
+
+    .presets { margin-top: 2.4vh; }
+
+    .barrier-card { flex-basis: 82vw; height: 400px; }
+
+    .barrier-card h3 { font-size: 1.6rem; }
+
+    .stat-inner h2 { font-size: clamp(1.9rem, 8.4vw, 2.8rem); }
+
+    .stat-copy p { font-size: .9rem; }
+
+    .btn-shutdown { padding: 15px 34px; }
+
+    .end-title { font-size: 11.2vw; }
+
+    .end-foot {
+      left: 24px;
+      right: 24px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .chapter strong { font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+
+    .line-mask > span,
+    .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .ghost,
+    .scroll-cue i,
+    .coin.spin { animation: none !important; }
+
+    .start-arrow { animation: none !important; }
+    .preface-start:hover { transform: none; }
+
+    #kellyCurve { stroke-dashoffset: 0 !important; transition: none !important; }
+    #kellyNeg, #kellyDot { opacity: 1 !important; transition: none !important; }
+  }
+</style>
+</head>
+<body class="light">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+
+<header class="hud">
+  <div class="brand">
+    <div class="logo">P<span class="dot"></span></div>
+    <div class="hud-meta">概率研究<br>A Study of Expectation</div>
+  </div>
+  <div class="chapter">
+    <strong id="hudIndex">00</strong>
+    <span>/ 08</span>
+  </div>
+</header>
+
+<nav class="side-nav" aria-label="章节导航">
+  <a href="#preface" data-label="序" class="active" aria-label="序"></a>
+  <a href="#hero" data-label="问题" aria-label="问题"></a>
+  <a href="#game" data-label="游戏" aria-label="游戏"></a>
+  <a href="#lives" data-label="人生" aria-label="人生"></a>
+  <a href="#split" data-label="分裂" aria-label="分裂"></a>
+  <a href="#lever" data-label="杠杆" aria-label="杠杆"></a>
+  <a href="#barriers" data-label="吸收壁" aria-label="吸收壁"></a>
+  <a href="#statistic" data-label="统计量" aria-label="统计量"></a>
+  <a href="#end" data-label="结尾" aria-label="结尾"></a>
+</nav>
+
+<div class="progress" aria-hidden="true"><span id="progressFill"></span></div>
+
+<main>
+
+  <!-- 00 / preface -->
+  <section id="preface" class="scene light preface" data-chapter="00">
+    <span class="preface-ghost" aria-hidden="true">0.005</span>
+    <div class="inner preface-inner">
+      <div class="preface-top">
+        <div class="preface-kicker">
+          <span>一个可以玩的概率实验</span>
+          <span>A Playable Probability Experiment</span>
+          <a class="preface-start" href="#hero"><span>开始</span><span class="start-arrow" aria-hidden="true">↓</span></a>
+        </div>
+
+        <h1 class="preface-title">
+          <span class="line-mask"><span>一个看起来稳赚的游戏，</span></span>
+          <span class="line-mask"><span>为什么<em>大多数人</em>还是输了？</span></span>
+        </h1>
+
+        <div class="preface-body">
+          <div>
+            <p>这个页面只做一件事：让你亲手玩一个抛硬币游戏，然后把这 100 次的结果，和 4,000 个别人的结果放在一起看。</p>
+            <p>游戏规则：正面 ×1.5，反面 ×0.6。平均下来，每玩一次多 5%；但玩 100 次，最可能的结果是 0.005。</p>
+          </div>
+          <div>
+            <p class="preface-strong">平均数没有错。<br>错的是我们把它当成了「最可能发生的事」。</p>
+            <p class="preface-small">为什么「平均」和「大多数人的结果」不是一回事？下面六步，一步一把这件事拆开。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="preface-route reveal" style="--d:.15s">
+        <div class="step">
+          <span class="num">01</span>
+          <p class="name">先玩一局</p>
+          <p class="desc">点硬币，或直接抛 100 次；看你的 1.00× 变成多少。</p>
+          <div class="meta"><span>随机变量 · 期望值</span><span>第 02 幕</span></div>
+        </div>
+        <div class="step">
+          <span class="num">02</span>
+          <p class="name">再看 4,000 个人玩</p>
+          <p class="desc">往下滚，4,000 条路径从左到右长出来；平均线向上，大多数线向下。</p>
+          <div class="meta"><span>方差 · 中位数 · 几何平均</span><span>第 03 幕</span></div>
+        </div>
+        <div class="step">
+          <span class="num">03</span>
+          <p class="name">算清楚差在哪</p>
+          <p class="desc">同一场游戏：平均 131.5×，大多数人的结果 0.005×，相差 25,000 倍。</p>
+          <div class="meta"><span>大数定律 · 非遍历性</span><span>第 04 幕</span></div>
+        </div>
+        <div class="step">
+          <span class="num">04</span>
+          <p class="name">改一个变量</p>
+          <p class="desc">拖动「每次押多少」，看 200 条命实时变化；全押几乎必死，25% 能长期增长。</p>
+          <div class="meta"><span>凯利公式 · 复利</span><span>第 05 幕</span></div>
+        </div>
+        <div class="step">
+          <span class="num">05</span>
+          <p class="name">看现实里的归零</p>
+          <p class="desc">创业、杠杆、熬夜、感情、职业、名声；哪些东西一旦归零就没有下一次。</p>
+          <div class="meta"><span>吸收壁</span><span>第 06 幕</span></div>
+        </div>
+        <div class="step">
+          <span class="num">06</span>
+          <p class="name">最后关掉机器</p>
+          <p class="desc">回到你自己：平均数没有错，错的是拿它当剧本。</p>
+          <div class="meta"><span>结论</span><span>第 07–08 幕</span></div>
+        </div>
+      </div>
+
+      <div class="preface-foot reveal" style="--d:.25s">
+        <p class="preface-note">这不是赌博建议，也不是理财建议。<br>这是一次关于「平均」和「你只有一条命」的概率实验。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01 / hero -->
+  <section id="hero" class="scene scene-hero" data-chapter="01">
+    <span class="ghost" aria-hidden="true">1.05</span>
+    <div class="inner hero-inner">
+      <p class="eyebrow reveal">01 / The Question</p>
+      <h1 class="display">
+        <span class="line-mask"><span>每一步都选对了，</span></span>
+        <span class="line-mask"><span>为什么还是输了？</span></span>
+      </h1>
+      <p class="hero-sub reveal" style="--d:.5s">一个关于期望、波动，与「你只有一条命」的实验。</p>
+    </div>
+    <div class="scroll-cue"><span>SCROLL</span><i></i></div>
+  </section>
+
+  <!-- 01 / game -->
+  <section id="game" class="scene" data-chapter="02">
+    <div class="inner">
+      <div class="game-grid">
+        <div class="game-copy">
+          <p class="eyebrow reveal">02 / The Game</p>
+          <h2 class="reveal" style="--d:.06s">抛一枚硬币。</h2>
+          <p class="lead reveal" style="--d:.12s">正面 ×1.5，反面 ×0.6。期望 1.05。正期望，理性上你该一直玩。</p>
+          <p class="lead reveal" style="--d:.18s; margin-top:1.2em;">但先别急着相信这个 1.05。<br>它描述的是一万个你，不是这一个你。</p>
+        </div>
+
+        <div class="game-stage">
+          <div class="coin-wrap reveal" style="--d:.16s">
+            <button class="coin" id="coin" type="button" aria-label="抛一次硬币">
+              <span class="coin-value" id="coinValue">×1.5</span>
+              <span class="coin-sub" id="coinSub">HEADS</span>
+            </button>
+          </div>
+
+          <div class="game-data reveal" style="--d:.24s">
+            <div class="readout">
+              <span class="label">财富</span>
+              <span class="value" id="wealth">1.00×</span>
+            </div>
+            <div class="readout">
+              <span class="label">次数</span>
+              <span class="value" id="flips">0</span>
+            </div>
+            <svg class="spark" id="spark" viewBox="0 0 260 64" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <div class="actions">
+              <button class="btn" id="flipOnce" type="button">抛一次</button>
+              <button class="btn btn-ghost" id="flipHundred" type="button">抛 100 次</button>
+              <button class="btn link" id="resetGame" type="button">重置</button>
+            </div>
+            <p class="game-note" id="gameNote">期望值说：一直玩。典型值说：别。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 / lives -->
+  <section id="lives" class="scene lives pin-wrap" data-chapter="03">
+    <div class="pin">
+      <div class="lives-stage">
+        <canvas id="pathsCanvas" role="img" aria-label="四千条随机财富路径，平均值向上，中位数向下。"></canvas>
+        <canvas id="pathsOverlay" aria-hidden="true"></canvas>
+
+        <div class="lives-axis" aria-hidden="true">
+          <span style="top:12%">1万×</span>
+          <span style="top:26.4%">100×</span>
+          <span style="top:40.8%">1×</span>
+          <span style="top:55.2%">0.01×</span>
+          <span style="top:69.6%">0.0001×</span>
+          <span style="top:84%">出局</span>
+        </div>
+
+        <div class="wipe" id="wipe"></div>
+
+        <div class="lives-top">
+          <p class="eyebrow">03 / 4,000 Lives</p>
+          <h2>四千条人生，<br>没有一条是平均值。</h2>
+          <p class="lives-sub">每一条都从 1 开始，玩同一个游戏，抛 100 次。</p>
+        </div>
+
+        <div class="time-readout" id="timeReadout">T+000</div>
+
+        <div class="lives-legend" aria-hidden="true">
+          <span><i class="lg-line mean"></i>平均值</span>
+          <span><i class="lg-line median"></i>中位数</span>
+          <span><i class="lg-dot"></i>一条人生</span>
+        </div>
+
+        <div class="lives-bottom">
+          <div class="live-stats">
+            <div><span>平均值</span><strong>131.5×</strong></div>
+            <div><span>中位数</span><strong>0.005×</strong></div>
+            <div><span>路径</span><strong>4,000</strong></div>
+          </div>
+          <div class="lives-controls">
+            <button class="btn red" id="replayBtn" type="button">再活一次</button>
+            <p class="path-caption" id="pathCaption">抽一条属于你的路径。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 / split -->
+  <section id="split" class="scene light split" data-chapter="04">
+    <div class="inner">
+      <div class="split-head">
+        <p class="eyebrow reveal">04 / The Split</p>
+        <h2 class="reveal" style="--d:.06s">同一场游戏，<br>两个答案。</h2>
+        <p class="lead reveal" style="--d:.12s">期望值说你会赢。<br>中位数说你会输。</p>
+      </div>
+
+      <div class="split-nums reveal" style="--d:.18s">
+        <div class="num-block">
+          <span class="num-label">期望值</span>
+          <strong class="giant" data-count="131.5" data-decimals="1">0</strong>
+        </div>
+        <div class="num-sep" aria-hidden="true">/</div>
+        <div class="num-block">
+          <span class="num-label">中位数</span>
+          <strong class="giant red" data-count="0.005" data-decimals="3">0</strong>
+        </div>
+      </div>
+
+      <div class="gap-line reveal" style="--d:.24s">
+        <span class="rule"></span>
+        <p>相差 <em data-count="25000" data-decimals="0">0</em> 倍</p>
+      </div>
+
+      <div class="three-lives reveal" style="--d:.3s">
+        <div>
+          <div class="tl-head"><span>60 正 / 40 反</span><span>运气不错</span></div>
+          <span class="tl-num">49×</span>
+          <span class="tl-note">仍然只有期望值的四成</span>
+          <svg viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 28 L14 26 L26 22 L38 23 L52 17 L66 14 L80 11 L94 7 L108 4 L120 2" fill="none" stroke="#c8321f" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="tl-head"><span>50 正 / 50 反</span><span>最典型</span></div>
+          <span class="tl-num">0.005×</span>
+          <span class="tl-note">一半的人落在它下面</span>
+          <svg viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 8 L14 10 L26 12 L38 13 L52 16 L66 18 L80 21 L94 24 L108 27 L120 30" fill="none" stroke="rgba(10,10,10,.45)" stroke-width="1.2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="tl-head"><span>40 正 / 60 反</span><span>运气很差</span></div>
+          <span class="tl-num">0.0000005×</span>
+          <span class="tl-note">几乎归零</span>
+          <svg viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 4 L14 7 L26 6 L38 12 L52 13 L66 18 L80 20 L94 25 L108 29 L120 33" fill="none" stroke="rgba(10,10,10,.3)" stroke-width="1.2"/>
+          </svg>
+        </div>
+      </div>
+
+      <p class="split-note reveal" style="--d:.36s">
+        只差 10 次正面，结果差了近 1 亿倍。期望值用的是加法世界的直觉：赢一点、输一点，最后差不多。<b>真实的人生是乘法</b>：每一次失败不是减去一部分，而是把之前的所有，乘上一个小于 1 的数。
+      </p>
+
+      <p class="history-note reveal" style="--d:.42s">
+        1738 年，丹尼尔·伯努利提出圣彼得堡悖论：一个期望收益无限的游戏，却没人愿意花大钱玩。他把它归因于「效用」。三百年后，我们发现了另一层：期望值算的是平行世界，而你只有一条时间线。
+      </p>
+    </div>
+  </section>
+
+  <!-- 04 / lever -->
+  <section id="lever" class="scene lever" data-chapter="05">
+    <div class="inner">
+      <div class="lever-grid">
+        <div class="lever-copy">
+          <p class="eyebrow reveal">05 / The Only Lever</p>
+          <h2 class="reveal" style="--d:.06s">你改不了概率。<br>但你能改下注。</h2>
+          <p class="lead reveal" style="--d:.12s">同样一个游戏。全押是必死，只押 25% 却能稳定增长。</p>
+
+          <div class="lever-readout reveal" style="--d:.18s">
+            <div><span>每次平均增长</span><strong id="growthVal">+0.62%</strong></div>
+            <div><span>100 次后中位数</span><strong id="medianVal">1.86×</strong></div>
+          </div>
+
+          <div class="presets reveal" style="--d:.24s">
+            <button class="preset" type="button" data-f="1">全押 100%</button>
+            <button class="preset active" type="button" data-f="0.25">最优 25%</button>
+            <button class="preset" type="button" data-f="0.05">保守 5%</button>
+          </div>
+
+          <p class="lever-caption" id="leverCaption">f* = 25%：长期增长率最大。</p>
+
+          <p class="lever-formula">f* = (p·a − q·c) / (a·c)</p>
+
+          <p class="lever-close reveal" style="--d:.3s"><b>赌注大小，是你能控制的唯一变量。</b><br>它决定了你是在玩期望，还是在玩命。</p>
+        </div>
+
+        <div class="lever-viz reveal" style="--d:.14s">
+          <svg id="kellyChart" viewBox="0 0 720 380" role="img" aria-label="下注比例与长期增长率的关系：25% 时最高，50% 时归零。">
+            <defs>
+              <linearGradient id="curveGrad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#f4f1ea"/>
+                <stop offset="62%" stop-color="#f4f1ea"/>
+                <stop offset="100%" stop-color="#ff4a3d"/>
+              </linearGradient>
+              <linearGradient id="negFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ff4a3d" stop-opacity=".2"/>
+                <stop offset="100%" stop-color="#ff4a3d" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g id="kellyGrid"></g>
+            <path id="kellyNeg" fill="url(#negFill)"></path>
+            <line id="kellyZero" stroke="rgba(244,241,234,.28)" stroke-dasharray="4 6"></line>
+            <path id="kellyCurve" fill="none" stroke="url(#curveGrad)" stroke-width="2.2" pathLength="1" stroke-linecap="round"></path>
+            <line id="kellyVLine" stroke="rgba(255,74,61,.38)" stroke-dasharray="3 4"></line>
+            <circle id="kellyDot" r="7" fill="#ff4a3d" stroke="#050506" stroke-width="3"></circle>
+            <g id="kellyLabels"></g>
+          </svg>
+
+          <div class="slider-wrap">
+            <div class="slider-head"><span>下注比例 f</span><strong id="kellyValue">25%</strong></div>
+            <input type="range" id="kellySlider" min="0" max="100" value="25" step="1" aria-label="下注比例">
+            <div class="slider-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          </div>
+
+          <div class="lever-strip">
+            <p class="lever-strip-label">同样的 200 条命，不同的下注比例</p>
+            <canvas id="leverPaths" aria-hidden="true"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 / barriers -->
+  <section id="barriers" class="scene light barriers" data-chapter="06">
+    <div class="pin">
+      <div class="barriers-head">
+        <p class="eyebrow reveal">06 / Absorbing Barriers</p>
+        <h2 class="reveal" style="--d:.06s">有些东西，<br>归零之后没有下一次。</h2>
+      </div>
+
+      <div class="barriers-viewport">
+        <div class="barriers-track" id="barriersTrack">
+          <article class="barrier-card">
+            <span class="card-index">01</span>
+            <h3>创业</h3>
+            <p class="card-expect">期望：做出一个高增长的公司。</p>
+            <p class="card-wall">吸收壁：<b>现金流断裂</b>。</p>
+            <p class="card-copy">你可以错九次，但第十次没有现金，就没有第十一次。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 58 L28 48 L50 55 L78 34 L104 40 L132 22 L160 30 L188 46 L214 52 L242 70 L270 76 L300 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+
+          <article class="barrier-card">
+            <span class="card-index">02</span>
+            <h3>杠杆</h3>
+            <p class="card-expect">期望：放大收益。</p>
+            <p class="card-wall">吸收壁：<b>爆仓</b>。</p>
+            <p class="card-copy">10 倍杠杆下，10% 的回撤就让你归零。你不需要错很多次，只需要错一次。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 42 L26 38 L54 44 L82 32 L110 36 L138 26 L166 30 L194 42 L222 46 L250 60 L278 68 L306 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+
+          <article class="barrier-card">
+            <span class="card-index">03</span>
+            <h3>熬夜</h3>
+            <p class="card-expect">期望：每天多出几个小时。</p>
+            <p class="card-wall">吸收壁：<b>健康</b>。</p>
+            <p class="card-copy">它不会提前通知你。你只会某一天发现，恢复力已经不在了。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 30 L30 28 L58 34 L86 30 L114 38 L142 36 L170 44 L198 50 L226 56 L254 62 L282 70 L310 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+
+          <article class="barrier-card">
+            <span class="card-index">04</span>
+            <h3>感情</h3>
+            <p class="card-expect">期望：把全部交给一个人。</p>
+            <p class="card-wall">吸收壁：<b>自我</b>。</p>
+            <p class="card-copy">一次失去，就是归零。不是每一次心碎都能重建。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 26 L28 22 L56 30 L84 24 L112 34 L140 40 L168 38 L196 52 L224 58 L252 66 L280 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+
+          <article class="barrier-card">
+            <span class="card-index">05</span>
+            <h3>职业</h3>
+            <p class="card-expect">期望：选期望收益最高的路。</p>
+            <p class="card-wall">吸收壁：<b>恢复力</b>。</p>
+            <p class="card-copy">你忽略了波动、倦怠，和重新开始的能力。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 52 L28 44 L56 50 L84 38 L112 46 L140 36 L168 42 L196 54 L224 50 L252 64 L280 72 L308 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+
+          <article class="barrier-card">
+            <span class="card-index">06</span>
+            <h3>名声</h3>
+            <p class="card-expect">期望：被更多人看见。</p>
+            <p class="card-wall">吸收壁：<b>信任</b>。</p>
+            <p class="card-copy">一次崩塌，很难回到从前。名声是复利，也是单点故障。</p>
+            <svg class="card-line" viewBox="0 0 360 96" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M0 24 L28 20 L56 26 L84 18 L112 24 L140 20 L168 28 L196 36 L224 44 L252 56 L280 68 L308 76 L360 76" fill="none" stroke="rgba(242,239,232,.38)" stroke-width="1"/>
+              <line x1="0" y1="76" x2="360" y2="76" stroke="#ff4a3d" stroke-opacity=".55"/>
+            </svg>
+          </article>
+        </div>
+      </div>
+
+      <div class="barriers-foot">
+        <span id="barrierIndex">01 / 06</span>
+        <div class="bar"><span id="barrierProgress"></span></div>
+        <span>SCROLL</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 / statistic -->
+  <section id="statistic" class="scene" data-chapter="07">
+    <canvas class="stat-bg" id="statCanvas" aria-hidden="true"></canvas>
+    <div class="inner stat-inner">
+      <p class="eyebrow reveal">07 / The Wrong Statistic</p>
+      <h2 class="reveal" style="--d:.06s">你不是不够努力。<br>你只是用错了统计量。</h2>
+      <div class="stat-copy reveal" style="--d:.12s">
+        <p>我们被训练成期望值最大化者。<br>选专业、选城市、选工作、选伴侣，<br>都在心里算一笔「期望收益」。</p>
+        <p>但期望值是给无数条命用的。<br>你只有一条。</p>
+        <p>焦虑，就是拿「平均值」当自己的剧本，<br>而你的路径是随机的。差距越大，越焦虑。</p>
+      </div>
+      <button class="btn btn-shutdown reveal" id="shutdown" type="button" style="--d:.18s">关掉机器</button>
+    </div>
+  </section>
+
+  <!-- 07 / end -->
+  <section id="end" class="scene end" data-chapter="08">
+    <div class="inner end-inner">
+      <p class="eyebrow reveal">08 / Outlast</p>
+      <h2 class="end-title reveal" style="--d:.06s">平均会赢。<br><em>但你不被平均。</em></h2>
+      <p class="end-sub reveal" style="--d:.14s">先别出局，再谈赢。</p>
+    </div>
+    <div class="end-foot">
+      <span>模型是玩具，结论不是。<br>A Small Probability Experiment · 2026</span>
+      <a href="#preface" id="replayLink">REPLAY ↑</a>
+    </div>
+  </section>
+
+</main>
+
+<noscript>
+  <style>
+    .line-mask > span, .reveal { opacity: 1 !important; transform: none !important; }
+  </style>
+</noscript>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var scenes = $$('.scene');
+  var sideLinks = $$('.side-nav a');
+  var hudIndex = $('#hudIndex');
+  var progressFill = $('#progressFill');
+  var currentScene = null;
+  var lightOn = false;
+  var ticking = false;
+
+  /* ---------------- scroll engine ---------------- */
+
+  function requestTick() {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(tick);
+    }
+  }
+
+  function tick() {
+    ticking = false;
+
+    var y = window.scrollY;
+    var vh = window.innerHeight;
+    var max = document.documentElement.scrollHeight - vh;
+    progressFill.style.transform = 'scaleX(' + (max > 0 ? clamp(y / max, 0, 1) : 0) + ')';
+
+    var topY = y + 2;
+    var current = scenes[0];
+    for (var i = 0; i < scenes.length; i++) {
+      if (scenes[i].offsetTop <= topY) current = scenes[i];
+    }
+
+    if (current !== currentScene) {
+      currentScene = current;
+      hudIndex.textContent = current.getAttribute('data-chapter') || '00';
+
+      sideLinks.forEach(function (link) {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + current.id);
+      });
+
+      var isLight = current.classList.contains('light');
+      if (isLight !== lightOn) {
+        lightOn = isLight;
+        document.body.classList.toggle('light', isLight);
+      }
+    }
+
+    // reveal fallback: works from scroll position, independent of IntersectionObserver
+    for (var s = 0; s < scenes.length; s++) {
+      var sceneEl = scenes[s];
+      if (sceneEl.classList.contains('is-in')) continue;
+      var rect = sceneEl.getBoundingClientRect();
+      if (rect.top < vh * 0.85 && rect.bottom > 0) {
+        sceneEl.classList.add('is-in');
+        $$('[data-count]', sceneEl).forEach(countUp);
+      }
+    }
+
+    updateLives();
+    updateBarriers();
+  }
+
+  window.addEventListener('scroll', requestTick, { passive: true });
+  window.addEventListener('resize', requestTick);
+
+  /* ---------------- lives ---------------- */
+
+  var lives = $('#lives');
+  var pathsCanvas = $('#pathsCanvas');
+  var overlayCanvas = $('#pathsOverlay');
+  var wipe = $('#wipe');
+  var timeReadout = $('#timeReadout');
+  var replayBtn = $('#replayBtn');
+  var pathCaption = $('#pathCaption');
+  var livesComplete = false;
+
+  var TOTAL_PATHS = 4000;
+  var STEPS = 100;
+  var LOG_FLOOR = -6;
+  var LOG_CEIL = 4;
+  var LOG_MEAN = Math.log10(1.05);
+  var LOG_MEDIAN = Math.log10(0.9) / 2;
+
+  var paths = [];
+  var finals = [];
+  var selectedPath = null;
+  var selectedFinal = 1;
+  var replayToken = 0;
+
+  function mulberry32(a) {
+    return function () {
+      a |= 0;
+      a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildPaths() {
+    var rand = mulberry32(20261107);
+    paths = [];
+    finals = [];
+    for (var i = 0; i < TOTAL_PATHS; i++) {
+      var w = 1;
+      var arr = new Float32Array(STEPS + 1);
+      arr[0] = 0;
+      for (var t = 1; t <= STEPS; t++) {
+        w *= rand() < 0.5 ? 1.5 : 0.6;
+        arr[t] = Math.log10(Math.max(w, 1e-14));
+      }
+      paths.push(arr);
+      finals.push(w);
+    }
+  }
+
+  function plotMetrics(w, h) {
+    return {
+      l: w * 0.06,
+      r: w * 0.06,
+      t: h * 0.12,
+      b: h * 0.16
+    };
+  }
+
+  function drawPaths() {
+    var w = pathsCanvas.clientWidth;
+    var h = pathsCanvas.clientHeight;
+    if (!w || !h) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    pathsCanvas.width = Math.round(w * dpr);
+    pathsCanvas.height = Math.round(h * dpr);
+    var c = pathsCanvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+
+    var p = plotMetrics(w, h);
+    var plotW = w - p.l - p.r;
+    var plotH = h - p.t - p.b;
+
+    var xOf = function (t) { return p.l + (t / STEPS) * plotW; };
+    var yOf = function (l) {
+      return p.t + (LOG_CEIL - clamp(l, LOG_FLOOR, LOG_CEIL)) / (LOG_CEIL - LOG_FLOOR) * plotH;
+    };
+
+    // grid
+    c.save();
+    c.strokeStyle = 'rgba(242,239,232,.055)';
+    c.lineWidth = 1;
+    [4, 2, 0, -2, -4, -6].forEach(function (g) {
+      var y = yOf(g);
+      c.beginPath();
+      c.moveTo(p.l, y);
+      c.lineTo(w - p.r, y);
+      c.stroke();
+    });
+    c.restore();
+
+    // paths: paint on an offscreen layer, then blur it into a fog
+    var fog = document.createElement('canvas');
+    fog.width = pathsCanvas.width;
+    fog.height = pathsCanvas.height;
+    var fc = fog.getContext('2d');
+    fc.setTransform(dpr, 0, 0, dpr, 0, 0);
+    fc.strokeStyle = 'rgba(242,239,232,.2)';
+    fc.lineWidth = 1;
+    for (var i = 0; i < paths.length; i += 45) {
+      fc.beginPath();
+      var end = Math.min(i + 45, paths.length);
+      for (var j = i; j < end; j++) {
+        var arr = paths[j];
+        fc.moveTo(xOf(0), yOf(arr[0]));
+        for (var t = 1; t <= STEPS; t++) fc.lineTo(xOf(t), yOf(arr[t]));
+      }
+      fc.stroke();
+    }
+
+    c.save();
+    c.filter = 'blur(7px)';
+    c.globalAlpha = 1;
+    c.drawImage(fog, 0, 0, w, h);
+    c.restore();
+
+    // a sparse final layer: individual lives reading through the fog
+    c.save();
+    c.strokeStyle = 'rgba(242,239,232,.04)';
+    c.lineWidth = 0.7;
+    for (var k = 0; k < paths.length; k += 16) {
+      var single = paths[k];
+      c.beginPath();
+      c.moveTo(xOf(0), yOf(single[0]));
+      for (var q = 1; q <= STEPS; q++) c.lineTo(xOf(q), yOf(single[q]));
+      c.stroke();
+    }
+    c.restore();
+
+    // median
+    c.save();
+    c.strokeStyle = 'rgba(244,241,234,.72)';
+    c.lineWidth = 1.5;
+    c.shadowColor = 'rgba(244,241,234,.35)';
+    c.shadowBlur = 10;
+    c.setLineDash([5, 6]);
+    c.beginPath();
+    for (var mt = 0; mt <= STEPS; mt++) {
+      var mx = xOf(mt);
+      var my = yOf(mt * LOG_MEDIAN);
+      if (mt === 0) c.moveTo(mx, my); else c.lineTo(mx, my);
+    }
+    c.stroke();
+    c.restore();
+
+    // mean
+    c.save();
+    c.strokeStyle = '#ff4a3d';
+    c.lineWidth = 2.4;
+    c.shadowColor = 'rgba(255,74,61,.45)';
+    c.shadowBlur = 16;
+    c.beginPath();
+    for (var et = 0; et <= STEPS; et++) {
+      var ex = xOf(et);
+      var ey = yOf(et * LOG_MEAN);
+      if (et === 0) c.moveTo(ex, ey); else c.lineTo(ex, ey);
+    }
+    c.stroke();
+    c.restore();
+  }
+
+  function drawSelected(upto) {
+    var w = overlayCanvas.clientWidth;
+    var h = overlayCanvas.clientHeight;
+    if (!w || !h) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (overlayCanvas.width !== Math.round(w * dpr) || overlayCanvas.height !== Math.round(h * dpr)) {
+      overlayCanvas.width = Math.round(w * dpr);
+      overlayCanvas.height = Math.round(h * dpr);
+    }
+
+    var c = overlayCanvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+    if (!selectedPath) return;
+
+    var p = plotMetrics(w, h);
+    var plotW = w - p.l - p.r;
+    var plotH = h - p.t - p.b;
+    var xOf = function (t) { return p.l + (t / STEPS) * plotW; };
+    var yOf = function (l) {
+      return p.t + (LOG_CEIL - clamp(l, LOG_FLOOR, LOG_CEIL)) / (LOG_CEIL - LOG_FLOOR) * plotH;
+    };
+
+    var last = Math.max(0, Math.min(STEPS, Math.floor(STEPS * upto)));
+
+    c.save();
+    c.strokeStyle = '#ff6b5e';
+    c.lineWidth = 2.2;
+    c.lineJoin = 'round';
+    c.lineCap = 'round';
+    c.shadowColor = 'rgba(255,74,61,.8)';
+    c.shadowBlur = 18;
+    c.beginPath();
+    c.moveTo(xOf(0), yOf(selectedPath[0]));
+    for (var t = 1; t <= last; t++) c.lineTo(xOf(t), yOf(selectedPath[t]));
+    c.stroke();
+    c.restore();
+
+    c.save();
+    c.fillStyle = '#fff';
+    c.shadowColor = 'rgba(255,255,255,.9)';
+    c.shadowBlur = 14;
+    c.beginPath();
+    c.arc(xOf(last), yOf(selectedPath[last]), 3.2, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+
+  function fmtMult(v) {
+    if (!isFinite(v)) return '∞';
+    if (v >= 10000) return Math.round(v).toLocaleString('en-US');
+    if (v >= 100) return Math.round(v).toString();
+    if (v >= 10) return v.toFixed(1);
+    if (v >= 1) return v.toFixed(2);
+    if (v >= 0.01) return v.toFixed(3);
+    if (v >= 0.0001) return v.toFixed(4);
+    return v.toExponential(1);
+  }
+
+  function finishSelected() {
+    var rank = 0;
+    for (var i = 0; i < finals.length; i++) if (finals[i] < selectedFinal) rank++;
+    var pct = Math.round(rank / Math.max(1, finals.length) * 100);
+
+    if (selectedFinal < 1e-6) {
+      pathCaption.textContent = '100 次之后：出局。你超过了 ' + pct + '% 的路径。';
+    } else {
+      pathCaption.textContent = '100 次之后：' + fmtMult(selectedFinal) + '。你超过了 ' + pct + '% 的路径。';
+    }
+  }
+
+  function replayLife() {
+    var token = ++replayToken;
+    var w = 1;
+    var arr = new Float32Array(STEPS + 1);
+    arr[0] = 0;
+    for (var t = 1; t <= STEPS; t++) {
+      w *= Math.random() < 0.5 ? 1.5 : 0.6;
+      arr[t] = Math.log10(Math.max(w, 1e-14));
+    }
+
+    selectedPath = arr;
+    selectedFinal = w;
+
+    if (reduceMotion) {
+      drawSelected(1);
+      finishSelected();
+      return;
+    }
+
+    var start = performance.now();
+    var duration = 1150;
+
+    function frame(now) {
+      if (token !== replayToken) return;
+      var p = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      drawSelected(eased);
+      if (p < 1) {
+        window.requestAnimationFrame(frame);
+      } else {
+        drawSelected(1);
+        finishSelected();
+      }
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  function updateLives() {
+    var total = lives.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+
+    var p = clamp(-lives.getBoundingClientRect().top / total, 0, 1);
+    pathsCanvas.style.clipPath = 'inset(0 ' + (100 - p * 100).toFixed(2) + '% 0 0)';
+    wipe.style.left = (6 + p * 88).toFixed(2) + '%';
+    timeReadout.textContent = 'T+' + String(Math.round(p * STEPS)).padStart(3, '0');
+
+    var complete = p > 0.94;
+    if (complete !== livesComplete) {
+      livesComplete = complete;
+      lives.classList.toggle('complete', complete);
+    }
+  }
+
+  replayBtn.addEventListener('click', replayLife);
+
+  /* ---------------- barriers ---------------- */
+
+  var barriers = $('#barriers');
+  var barriersTrack = $('#barriersTrack');
+  var barrierProgress = $('#barrierProgress');
+  var barrierIndex = $('#barrierIndex');
+  var maxShift = 0;
+
+  function measureBarriers() {
+    if (!barriersTrack) return;
+    maxShift = Math.max(0, barriersTrack.scrollWidth - window.innerWidth + 90);
+  }
+
+  function updateBarriers() {
+    if (window.innerWidth <= 1080) return;
+
+    var total = barriers.offsetHeight - window.innerHeight;
+    if (total <= 0) return;
+
+    var p = clamp(-barriers.getBoundingClientRect().top / total, 0, 1);
+    barriersTrack.style.transform = 'translate3d(' + (-p * maxShift).toFixed(2) + 'px,0,0)';
+    barrierProgress.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    barrierIndex.textContent = String(Math.min(6, Math.floor(p * 6) + 1)).padStart(2, '0') + ' / 06';
+  }
+
+  /* ---------------- scene reveals / counters ---------------- */
+
+  function formatCount(v, d) {
+    return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+  }
+
+  function countUp(el) {
+    if (el.getAttribute('data-done')) return;
+    el.setAttribute('data-done', '1');
+
+    var target = parseFloat(el.getAttribute('data-count'));
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0', 10);
+
+    if (reduceMotion) {
+      el.textContent = formatCount(target, decimals);
+      return;
+    }
+
+    var start = performance.now();
+    var duration = 1500;
+
+    function frame(now) {
+      var p = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 4);
+      el.textContent = formatCount(target * eased, decimals);
+      if (p < 1) window.requestAnimationFrame(frame);
+      else el.textContent = formatCount(target, decimals);
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var sceneObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        el.classList.add('is-in');
+        $$('[data-count]', el).forEach(countUp);
+        sceneObserver.unobserve(el);
+      });
+    }, { threshold: 0.18 });
+
+    scenes.forEach(function (s) { sceneObserver.observe(s); });
+  } else {
+    scenes.forEach(function (s) {
+      s.classList.add('is-in');
+      $$('[data-count]', s).forEach(countUp);
+    });
+  }
+
+  /* ---------------- coin game ---------------- */
+
+  var coin = $('#coin');
+  var coinValue = $('#coinValue');
+  var coinSub = $('#coinSub');
+  var wealthEl = $('#wealth');
+  var flipsEl = $('#flips');
+  var spark = $('#spark');
+  var gameNote = $('#gameNote');
+
+  var wealth = 1;
+  var flips = 0;
+  var history = [1];
+  var displayWealth = 1;
+  var busy = false;
+  var wealthToken = 0;
+
+  function fmtWealth(v) {
+    if (v >= 1000) return Math.round(v).toLocaleString('en-US') + '×';
+    if (v >= 10) return v.toFixed(1) + '×';
+    if (v >= 0.01) return v.toFixed(2) + '×';
+    return v.toExponential(1) + '×';
+  }
+
+  function renderWealth(v) {
+    wealthEl.textContent = fmtWealth(v);
+    wealthEl.style.color = v < 1 ? 'var(--red)' : '';
+  }
+
+  function tweenWealth(to) {
+    var token = ++wealthToken;
+    var from = displayWealth;
+    var start = performance.now();
+    var duration = 380;
+
+    function frame(now) {
+      if (token !== wealthToken) return;
+      var p = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      displayWealth = from + (to - from) * eased;
+      renderWealth(displayWealth);
+      if (p < 1) window.requestAnimationFrame(frame);
+      else {
+        displayWealth = to;
+        renderWealth(to);
+      }
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  function drawSpark() {
+    var pts = history.slice(-60);
+    var logs = pts.map(function (v) { return Math.log10(Math.max(v, 1e-7)); });
+    var lo = Math.min(-0.15, Math.min.apply(null, logs));
+    var hi = Math.max(0.15, Math.max.apply(null, logs));
+    var range = hi - lo || 1;
+
+    if (pts.length < 2) {
+      spark.innerHTML = '<line x1="0" y1="32" x2="260" y2="32" stroke="rgba(244,241,234,.2)" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/><circle cx="260" cy="32" r="2.4" fill="#ff4a3d"/>';
+      return;
+    }
+
+    var points = logs.map(function (l, i) {
+      var x = (i / Math.max(pts.length - 1, 1)) * 260;
+      var y = 58 - ((l - lo) / range) * 52;
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+
+    var baseY = clamp(58 - ((0 - lo) / range) * 52, 4, 60);
+    var lastY = clamp(58 - ((logs[logs.length - 1] - lo) / range) * 52, 4, 60);
+    var color = wealth < 1 ? '#ff4a3d' : '#f4f1ea';
+
+    spark.innerHTML =
+      '<line x1="0" y1="' + baseY.toFixed(1) + '" x2="260" y2="' + baseY.toFixed(1) + '" stroke="rgba(244,241,234,.16)" stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>' +
+      '<polyline points="' + points + '" fill="none" stroke="' + color + '" stroke-width="1.4" vector-effect="non-scaling-stroke"/>' +
+      '<circle cx="260" cy="' + lastY.toFixed(1) + '" r="2.4" fill="#ff4a3d"/>';
+  }
+
+  function updateGameNote() {
+    if (flips === 0) {
+      gameNote.innerHTML = '期望值说：一直玩。典型值说：别。';
+      return;
+    }
+    if (flips >= 100) {
+      var label = flips === 100 ? '100 次之后' : '累计 ' + flips + ' 次之后';
+      var sub = flips === 100 ? '中位数 0.005× · 约 87.5% 的人更穷' : '中位数继续指数下降';
+      gameNote.innerHTML = label + '：<em>' + fmtWealth(wealth) + '</em>。' +
+        (wealth < 1 ? '你比开始时更穷。' : '你活下来了。') +
+        '<span>' + sub + '</span>';
+      return;
+    }
+    gameNote.innerHTML = '第 ' + flips + ' 次。期望值仍然是 1.05。';
+  }
+
+  function flipOnce() {
+    if (busy) return;
+    busy = true;
+
+    var win = Math.random() < 0.5;
+    wealth *= win ? 1.5 : 0.6;
+    flips++;
+    history.push(wealth);
+
+    coin.classList.remove('spin');
+    void coin.offsetWidth;
+    coin.classList.add('spin');
+
+    window.setTimeout(function () {
+      coinValue.textContent = win ? '×1.5' : '×0.6';
+      coinSub.textContent = win ? 'HEADS' : 'TAILS';
+      tweenWealth(wealth);
+      drawSpark();
+      flipsEl.textContent = String(flips);
+      updateGameNote();
+    }, 300);
+
+    window.setTimeout(function () {
+      coin.classList.remove('spin');
+      busy = false;
+    }, 740);
+  }
+
+  function flipMany(n) {
+    if (busy) return;
+    busy = true;
+    wealthToken++;
+
+    coin.classList.remove('spin');
+    void coin.offsetWidth;
+    coin.classList.add('spin');
+
+    var i = 0;
+    var lastWin = true;
+
+    var timer = window.setInterval(function () {
+      var batch = Math.min(4, n - i);
+      for (var j = 0; j < batch; j++) {
+        lastWin = Math.random() < 0.5;
+        wealth *= lastWin ? 1.5 : 0.6;
+        flips++;
+        history.push(wealth);
+        i++;
+      }
+
+      displayWealth = wealth;
+      renderWealth(wealth);
+      flipsEl.textContent = String(flips);
+      drawSpark();
+
+      if (i >= n) {
+        window.clearInterval(timer);
+        busy = false;
+        coin.classList.remove('spin');
+        coinValue.textContent = lastWin ? '×1.5' : '×0.6';
+        coinSub.textContent = lastWin ? 'HEADS' : 'TAILS';
+        updateGameNote();
+      }
+    }, 26);
+  }
+
+  function resetGame() {
+    wealthToken++;
+    wealth = 1;
+    flips = 0;
+    history = [1];
+    displayWealth = 1;
+    busy = false;
+    coin.classList.remove('spin');
+    coinValue.textContent = '×1.5';
+    coinSub.textContent = 'HEADS';
+    renderWealth(1);
+    flipsEl.textContent = '0';
+    drawSpark();
+    updateGameNote();
+  }
+
+  coin.addEventListener('click', flipOnce);
+  $('#flipOnce').addEventListener('click', flipOnce);
+  $('#flipHundred').addEventListener('click', function () { flipMany(100); });
+  $('#resetGame').addEventListener('click', resetGame);
+
+  /* ---------------- kelly chart ---------------- */
+
+  var chart = $('#kellyChart');
+  var K = { w: 720, h: 380, l: 64, r: 36, t: 40, b: 52, gmin: -0.06, gmax: 0.012 };
+  var kellySlider = $('#kellySlider');
+  var kellyDot = $('#kellyDot');
+  var kellyVLine = $('#kellyVLine');
+  var kellyValue = $('#kellyValue');
+  var growthVal = $('#growthVal');
+  var medianVal = $('#medianVal');
+  var leverCaption = $('#leverCaption');
+  var currentF = 0.25;
+
+  function growth(f) {
+    return 0.5 * Math.log(1 + 0.5 * f) + 0.5 * Math.log(1 - 0.4 * f);
+  }
+
+  function kx(f) { return K.l + f * (K.w - K.l - K.r); }
+  function ky(g) { return K.t + (K.gmax - g) / (K.gmax - K.gmin) * (K.h - K.t - K.b); }
+
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (var k in attrs) {
+      if (Object.prototype.hasOwnProperty.call(attrs, k)) el.setAttribute(k, attrs[k]);
+    }
+    return el;
+  }
+
+  function buildChart() {
+    var grid = $('#kellyGrid');
+    var labels = $('#kellyLabels');
+    grid.innerHTML = '';
+    labels.innerHTML = '';
+
+    [0, -0.02, -0.04, -0.06].forEach(function (g) {
+      var y = ky(g);
+      grid.appendChild(svgEl('line', {
+        x1: K.l, y1: y, x2: K.w - K.r, y2: y,
+        stroke: 'rgba(244,241,234,.09)', 'stroke-width': 1
+      }));
+      var label = svgEl('text', {
+        x: K.l - 12, y: y + 4, 'text-anchor': 'end', class: 'chart-label'
+      });
+      label.textContent = g === 0 ? '0' : (g * 100).toFixed(0) + '%';
+      labels.appendChild(label);
+    });
+
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
+      var label = svgEl('text', {
+        x: kx(f), y: K.h - K.b + 22, 'text-anchor': 'middle', class: 'chart-label'
+      });
+      label.textContent = Math.round(f * 100) + '%';
+      labels.appendChild(label);
+    });
+
+    var d = '';
+    for (var i = 0; i <= 240; i++) {
+      var f = i / 240;
+      d += (i === 0 ? 'M' : 'L') + kx(f).toFixed(2) + ' ' + ky(growth(f)).toFixed(2) + ' ';
+    }
+    $('#kellyCurve').setAttribute('d', d);
+
+    var nd = 'M ' + kx(0.5).toFixed(2) + ' ' + ky(0).toFixed(2);
+    for (var j = 0; j <= 120; j++) {
+      var nf = 0.5 + j / 240;
+      nd += ' L ' + kx(nf).toFixed(2) + ' ' + ky(growth(nf)).toFixed(2);
+    }
+    nd += ' L ' + kx(1).toFixed(2) + ' ' + ky(0).toFixed(2) + ' Z';
+    $('#kellyNeg').setAttribute('d', nd);
+
+    var zero = $('#kellyZero');
+    zero.setAttribute('x1', K.l);
+    zero.setAttribute('y1', ky(0));
+    zero.setAttribute('x2', K.w - K.r);
+    zero.setAttribute('y2', ky(0));
+
+    var peak = svgEl('text', {
+      x: kx(0.25) + 12, y: ky(growth(0.25)) - 14, class: 'chart-label red'
+    });
+    peak.textContent = 'f* = 25%';
+    labels.appendChild(peak);
+
+    var zeroLabel = svgEl('text', {
+      x: kx(0.5) + 10, y: ky(0) - 10, class: 'chart-label'
+    });
+    zeroLabel.textContent = '增长归零';
+    labels.appendChild(zeroLabel);
+
+    var yTitle = svgEl('text', { x: K.l, y: 18, class: 'chart-label' });
+    yTitle.textContent = '长期增长率';
+    labels.appendChild(yTitle);
+
+    var xTitle = svgEl('text', {
+      x: K.w / 2, y: K.h - 10, 'text-anchor': 'middle', class: 'chart-label'
+    });
+    xTitle.textContent = '下注比例 f';
+    labels.appendChild(xTitle);
+  }
+
+  function setF(f, fromSlider) {
+    f = clamp(f, 0, 1);
+    currentF = f;
+
+    if (!fromSlider) kellySlider.value = String(Math.round(f * 100));
+
+    var g = growth(f);
+    var x = kx(f);
+    var y = ky(g);
+
+    kellyDot.setAttribute('cx', x.toFixed(2));
+    kellyDot.setAttribute('cy', y.toFixed(2));
+
+    kellyVLine.setAttribute('x1', x.toFixed(2));
+    kellyVLine.setAttribute('y1', ky(0).toFixed(2));
+    kellyVLine.setAttribute('x2', x.toFixed(2));
+    kellyVLine.setAttribute('y2', y.toFixed(2));
+
+    kellyValue.textContent = Math.round(f * 100) + '%';
+
+    var pct = g * 100;
+    growthVal.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+    medianVal.textContent = fmtMult(Math.exp(g * 100)) + '×';
+
+    var caption;
+    if (f === 0) caption = '不下注，钱不会变，也不会输。';
+    else if (f < 0.24) caption = '你还在牌桌上，但增长还没到最优。';
+    else if (f <= 0.26) caption = 'f* = 25%：长期增长率最大。';
+    else if (f < 0.49) caption = '比最优更激进，长期增长开始变慢。';
+    else if (f <= 0.51) caption = 'f = 50%：增长归零，你只是在原地打转。';
+    else if (f < 0.8) caption = '超过一半：你开始稳定地输。';
+    else caption = '这不是冒险，这是慢性出局。';
+
+    leverCaption.textContent = caption;
+    drawLeverPaths(f);
+  }
+
+  kellySlider.addEventListener('input', function () {
+    $$('.preset').forEach(function (b) { b.classList.remove('active'); });
+    setF(Number(kellySlider.value) / 100, true);
+  });
+
+  $$('.preset').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      $$('.preset').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      animateF(parseFloat(btn.getAttribute('data-f')));
+    });
+  });
+
+  function animateF(target) {
+    var from = currentF;
+    var start = performance.now();
+    var duration = 520;
+
+    function frame(now) {
+      var p = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - p, 3);
+      setF(from + (target - from) * eased, false);
+      if (p < 1) window.requestAnimationFrame(frame);
+    }
+
+    window.requestAnimationFrame(frame);
+  }
+
+  /* ---------------- lever path strip ---------------- */
+
+  var leverCanvas = $('#leverPaths');
+  var leverOutcomes = [];
+
+  function initOutcomes() {
+    var rand = mulberry32(4242);
+    leverOutcomes = [];
+    for (var i = 0; i < 200; i++) {
+      var arr = new Uint8Array(STEPS);
+      for (var t = 0; t < STEPS; t++) arr[t] = rand() < 0.5 ? 1 : 0;
+      leverOutcomes.push(arr);
+    }
+  }
+
+  function drawLeverPaths(f) {
+    var w = leverCanvas.clientWidth;
+    var h = leverCanvas.clientHeight;
+    if (!w || !h) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    leverCanvas.width = Math.round(w * dpr);
+    leverCanvas.height = Math.round(h * dpr);
+    var c = leverCanvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+
+    var top = 10;
+    var bottom = 10;
+    var yOf = function (l) {
+      return top + (2 - clamp(l, -4, 2)) / 6 * (h - top - bottom);
+    };
+    var xOf = function (t) { return (t / STEPS) * w; };
+
+    var up = 1 + 0.5 * f;
+    var down = 1 - 0.4 * f;
+    var n = leverOutcomes.length;
+    var stride = STEPS + 1;
+    var logs = new Float32Array(n * stride);
+
+    c.save();
+    c.strokeStyle = 'rgba(242,239,232,.075)';
+    c.lineWidth = 0.7;
+    for (var i = 0; i < n; i++) {
+      var arr = leverOutcomes[i];
+      var ww = 1;
+      var base = i * stride;
+      logs[base] = 0;
+      c.beginPath();
+      c.moveTo(0, yOf(0));
+      for (var t = 0; t < STEPS; t++) {
+        ww *= arr[t] ? up : down;
+        var l = Math.log10(Math.max(ww, 1e-8));
+        logs[base + t + 1] = l;
+        c.lineTo(xOf(t + 1), yOf(l));
+      }
+      c.stroke();
+    }
+    c.restore();
+
+    c.save();
+    c.strokeStyle = 'rgba(244,241,234,.2)';
+    c.setLineDash([3, 5]);
+    c.beginPath();
+    c.moveTo(0, yOf(0));
+    c.lineTo(w, yOf(0));
+    c.stroke();
+    c.restore();
+
+    var buf = new Float32Array(n);
+    c.save();
+    c.strokeStyle = '#ff4a3d';
+    c.lineWidth = 1.4;
+    c.shadowColor = 'rgba(255,74,61,.5)';
+    c.shadowBlur = 8;
+    c.beginPath();
+    for (var mt = 0; mt <= STEPS; mt += 4) {
+      for (var k = 0; k < n; k++) buf[k] = logs[k * stride + mt];
+      var sorted = buf.slice().sort();
+      var med = sorted[Math.floor(n / 2)];
+      var mx = xOf(mt);
+      var my = yOf(med);
+      if (mt === 0) c.moveTo(mx, my); else c.lineTo(mx, my);
+    }
+    c.stroke();
+    c.restore();
+  }
+
+  /* ---------------- statistic canvas ---------------- */
+
+  var statCanvas = $('#statCanvas');
+
+  function drawStatBg() {
+    var w = statCanvas.clientWidth;
+    var h = statCanvas.clientHeight;
+    if (!w || !h) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    statCanvas.width = Math.round(w * dpr);
+    statCanvas.height = Math.round(h * dpr);
+    var c = statCanvas.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.clearRect(0, 0, w, h);
+
+    var rand = mulberry32(99);
+    var yOf = function (l) { return 12 + (4 - clamp(l, -6, 4)) / 10 * (h - 24); };
+    var xOf = function (t) { return (t / STEPS) * w; };
+
+    c.strokeStyle = 'rgba(242,239,232,.05)';
+    c.lineWidth = 1;
+
+    for (var i = 0; i < 320; i++) {
+      var ww = 1;
+      c.beginPath();
+      c.moveTo(0, yOf(0));
+      for (var t = 0; t < STEPS; t++) {
+        ww *= rand() < 0.5 ? 1.5 : 0.6;
+        c.lineTo(xOf(t + 1), yOf(Math.log10(Math.max(ww, 1e-14))));
+      }
+      c.stroke();
+    }
+
+    c.strokeStyle = 'rgba(255,74,61,.5)';
+    c.lineWidth = 1.5;
+    c.beginPath();
+    for (var et = 0; et <= STEPS; et++) {
+      var ex = xOf(et);
+      var ey = yOf(et * LOG_MEAN);
+      if (et === 0) c.moveTo(ex, ey); else c.lineTo(ex, ey);
+    }
+    c.stroke();
+  }
+
+  /* ---------------- resize ---------------- */
+
+  var resizeTimer = null;
+
+  function resizeAll() {
+    drawPaths();
+    drawStatBg();
+    drawLeverPaths(currentF);
+    measureBarriers();
+    if (selectedPath) drawSelected(1);
+    requestTick();
+  }
+
+  window.addEventListener('resize', function () {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(resizeAll, 200);
+  });
+
+  /* ---------------- shutdown / replay ---------------- */
+
+  $('#shutdown').addEventListener('click', function () {
+    document.body.classList.add('off');
+    window.setTimeout(function () {
+      document.getElementById('end').scrollIntoView({ behavior: 'smooth' });
+    }, 180);
+  });
+
+  $('#replayLink').addEventListener('click', function () {
+    document.body.classList.remove('off');
+  });
+
+  /* ---------------- boot ---------------- */
+
+  buildPaths();
+  initOutcomes();
+  buildChart();
+  drawPaths();
+  drawStatBg();
+  drawLeverPaths(0.25);
+  setF(0.25, false);
+  drawSpark();
+  updateGameNote();
+  measureBarriers();
+  requestTick();
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      measureBarriers();
+      requestTick();
+    });
+  }
+
+  window.addEventListener('load', function () {
+    measureBarriers();
+    requestTick();
+  });
+
+})();
+</script>
+
+</body>
+</html>
