@@ -1608,194 +1608,397 @@
     .hud-meta { display: none; }
   }
 
-  /* ============ lab ============ */
+  /* ============ why ============ */
   .lab {
     background: radial-gradient(900px 520px at 72% 38%, rgba(200, 69, 44, .07), transparent 70%);
   }
 
   .lab-inner {
-    padding: 10vh 0 6vh;
+    padding: 9vh 0 7vh;
     justify-content: flex-start;
   }
 
-  .lab-head h2 { font-size: clamp(1.9rem, 4.2vw, 4rem); }
-  .lab-head .lead { max-width: 38em; }
+  .lab-head h2 { font-size: clamp(2rem, 4.4vw, 4.2rem); line-height: 1.08; }
+  .lab-head .lead { max-width: 40em; }
 
-  .lab-shell {
+  .why-grid {
     display: grid;
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: 330px minmax(0, 1fr);
     gap: 4vw;
     margin-top: 4vh;
-    flex: 1;
-    min-height: 0;
+    align-items: start;
   }
 
-  .lab-tabs { display: flex; flex-direction: column; }
-
-  .lab-tab {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    padding: 14px 0;
-    border: 0;
-    border-bottom: 1px solid var(--line);
-    background: none;
-    color: var(--muted);
-    font-family: var(--sans);
-    font-size: 13px;
-    letter-spacing: .03em;
-    text-align: left;
-    cursor: pointer;
-    transition: color .25s ease, padding-left .25s ease;
-  }
-
-  .lab-tab span {
+  .why-label {
+    margin: 0 0 10px;
     font-family: var(--mono);
     font-size: 8px;
-    letter-spacing: .1em;
+    letter-spacing: .18em;
+    text-transform: uppercase;
     color: var(--faint);
-    transition: color .25s ease;
   }
 
-  .lab-tab:hover { color: var(--fg); padding-left: 4px; }
-  .lab-tab.active { color: var(--fg); }
-  .lab-tab.active span { color: var(--red); }
-
-  .lab-tabs-note {
-    margin: 28px 0 0;
+  .why-asset {
+    margin: 0;
     font-family: var(--mono);
-    font-size: 9px;
-    line-height: 2;
-    letter-spacing: .08em;
-    color: var(--faint);
+    font-size: clamp(3rem, 5vw, 4.6rem);
+    font-weight: 200;
+    line-height: 1;
+    letter-spacing: -.05em;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
   }
 
-  .lab-stage { min-width: 0; }
-
-  .lab-panel { display: none; }
-  .lab-panel.active { display: block; }
-
-  .lab-panel-head {
-    display: grid;
-    grid-template-columns: 1.15fr .85fr;
-    gap: 3vw;
-    align-items: end;
-    margin-bottom: 2vh;
-  }
-
-  .lab-q {
-    margin: 0;
-    font-family: var(--serif);
-    font-size: clamp(1.2rem, 2.1vw, 1.8rem);
-    font-weight: 700;
-    line-height: 1.45;
-    letter-spacing: -.02em;
-  }
-
-  .lab-note {
-    margin: 0;
-    font-size: .78rem;
-    line-height: 1.8;
+  .why-asset span {
+    margin-left: 4px;
+    font-size: .38em;
     color: var(--muted);
   }
 
-  .lab-panel canvas {
+  .why-stats {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .why-stats span {
+    display: block;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .12em;
+    color: var(--faint);
+  }
+
+  .why-stats strong {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--fg);
+  }
+
+  .why-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .why-actions .btn {
+    padding: 11px 6px;
+    font-size: 11px;
+    letter-spacing: .03em;
+    white-space: nowrap;
+  }
+
+  .btn:disabled { opacity: .32; pointer-events: none; }
+
+  .why-ledger {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+
+  .why-manual {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .why-side {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid rgba(244, 241, 234, .18);
+    background: none;
+    color: var(--fg);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color .25s ease, background .25s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .why-side span {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .why-side.up { color: var(--red); }
+  .why-side.up:hover { border-color: var(--red); background: rgba(255, 74, 61, .08); }
+  .why-side.down:hover { border-color: rgba(244, 241, 234, .45); background: rgba(244, 241, 234, .04); }
+  .why-side:disabled { opacity: .32; pointer-events: none; }
+
+  .why-ledger-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .why-ledger-head .why-label { margin: 0; }
+
+  .why-mode { display: flex; gap: 10px; }
+
+  .why-mode button {
+    padding: 0 0 2px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .08em;
+    color: var(--faint);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+
+  .why-mode button:hover { color: var(--fg); }
+  .why-mode button.active { color: var(--red); border-bottom-color: var(--red); }
+
+  .why-chain {
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.7;
+    color: rgba(244, 241, 234, .7);
+    word-break: break-all;
+  }
+
+  .why-chain-sub {
+    margin: 6px 0 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .why-chain-sub:empty { display: none; }
+
+  .why-hint {
+    margin: 8px 0 0;
+    font-size: .74rem;
+    line-height: 1.75;
+    color: var(--faint);
+    transition: color .3s ease;
+  }
+
+  .why-hint.hot { color: var(--red); }
+
+  .why-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .why-log {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.8;
+    color: var(--faint);
+  }
+
+  .why-foot .btn { flex: 0 0 auto; }
+
+  .why-chart { min-width: 0; }
+
+  .why-chart canvas {
     display: block;
     width: 100%;
-    height: 280px;
+    height: 360px;
     border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
 
-  .lab-controls {
+  .why-legend {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 14px 24px;
-    margin-top: 16px;
-  }
-
-  .lab-controls label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: .76rem;
-    color: var(--muted);
-    letter-spacing: .02em;
-  }
-
-  .lab-controls label strong {
+    gap: 12px 22px;
+    margin-top: 12px;
     font-family: var(--mono);
-    font-size: .85rem;
+    font-size: 9px;
+    letter-spacing: .04em;
+    color: var(--faint);
+  }
+
+  .why-legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  .why-legend i {
+    display: inline-block;
+    width: 18px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .why-legend i.you {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  .why-legend i.mean { background: rgba(244, 241, 234, .55); }
+
+  .why-legend i.typical {
+    height: 0;
+    background: none;
+    border-top: 1px dashed rgba(244, 241, 234, .4);
+  }
+
+  .why-legend .why-scale { margin-left: auto; opacity: .75; }
+
+  .why-cue {
+    margin: 14px 0 0;
+    font-family: var(--mono);
+    font-size: 9px;
+    line-height: 1.9;
+    letter-spacing: .1em;
+    color: var(--faint);
+  }
+
+  .why-cue span { color: var(--red); }
+
+  .why-explain {
+    margin-top: 9vh;
+    padding-top: 5vh;
+    border-top: 1px solid var(--line);
+  }
+
+  .why-explain-head { max-width: 44em; }
+
+  .why-explain-head h3 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -.035em;
+  }
+
+  .why-explain-lead {
+    margin: 16px 0 0;
+    font-size: .88rem;
+    line-height: 1.8;
+    color: var(--muted);
+  }
+
+  .why-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3vw;
+    margin-top: 5vh;
+  }
+
+  .why-card { padding-top: 18px; border-top: 1px solid rgba(244, 241, 234, .16); }
+
+  .why-card-num {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .16em;
+    color: var(--red);
+  }
+
+  .why-card h4 {
+    margin: 10px 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -.01em;
+  }
+
+  .why-formula {
+    margin: 14px 0 0;
+    min-height: 3.2em;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--fg);
+  }
+
+  .why-formula em { font-style: normal; color: var(--red); }
+
+  .why-card p:last-child {
+    margin: 12px 0 0;
+    font-size: .8rem;
+    line-height: 1.85;
+    color: var(--muted);
+  }
+
+  .why-answer {
+    margin: 7vh 0 0;
+    font-size: clamp(1.45rem, 2.8vw, 2.3rem);
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: -.03em;
+    color: var(--fg);
+  }
+
+  .why-answer b { color: var(--red); font-weight: 500; }
+
+  .why-verdict {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 4vw;
+    margin-top: 4.5vh;
+    padding-top: 28px;
+    border-top: 1px solid rgba(244, 241, 234, .16);
+  }
+
+  .why-verdict-main {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.1vw, 1.75rem);
+    font-weight: 500;
+    line-height: 1.55;
+    letter-spacing: -.02em;
+  }
+
+  .why-verdict-main b { color: var(--red); font-weight: 600; }
+
+  .why-drag span {
+    display: block;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .16em;
+    color: var(--faint);
+  }
+
+  .why-drag strong {
+    display: block;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 1.1rem;
     font-weight: 400;
     color: var(--red);
   }
 
-  .lab-controls input[type="range"] { width: 120px; }
-
-  .lab-readout {
-    flex: 1;
-    min-width: 220px;
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 9px;
+  .why-drag p {
+    margin: 10px 0 0;
+    font-size: .76rem;
     line-height: 1.8;
-    color: var(--faint);
+    color: var(--muted);
   }
 
-  .lab-readout em { font-style: normal; color: var(--red); }
-
-  .monty-doors {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    max-width: 660px;
-    margin-top: 2vh;
-  }
-
-  .monty-door {
-    position: relative;
-    aspect-ratio: .82;
-    border: 1px solid rgba(244, 241, 234, .18);
-    background: #0c0c0e;
-    color: var(--fg);
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    transition: border-color .3s ease, background .3s ease, transform .3s var(--ease), opacity .3s ease;
-  }
-
-  .monty-door span {
+  .why-next {
+    margin: 5vh 0 0;
     font-family: var(--mono);
-    font-size: clamp(2rem, 4vw, 3.4rem);
-    font-weight: 200;
-    letter-spacing: -.04em;
-    color: rgba(244, 241, 234, .38);
-    transition: color .3s ease;
+    font-size: 10px;
+    letter-spacing: .06em;
+    color: var(--muted);
   }
 
-  .monty-door.goat span {
-    font-size: 12px;
-    letter-spacing: .32em;
-    color: rgba(244, 241, 234, .5);
-  }
-
-  .monty-door:hover { border-color: rgba(244, 241, 234, .45); transform: translateY(-3px); }
-  .monty-door:hover span { color: var(--fg); }
-  .monty-door.chosen { border-color: var(--red); }
-  .monty-door.opened { opacity: .55; }
-  .monty-door.car { background: var(--red-deep); }
-  .monty-door.car span { color: #fff; }
-
-  .monty-controls { margin-top: 18px; }
-
-  .monty-score {
-    margin: 14px 0 0;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: .08em;
-    color: var(--faint);
-  }
+  .why-next a { color: var(--red); border-bottom: 1px solid rgba(255, 74, 61, .35); padding-bottom: 2px; }
+  .why-next a:hover { border-color: var(--red); }
 
   @media (max-width: 1100px) and (min-width: 721px) {
     .preface-route { grid-template-columns: repeat(2, 1fr); }
@@ -1804,20 +2007,24 @@
     .preface-route .step:nth-child(n+5) { border-bottom: 1px solid rgba(10, 10, 10, .12); }
     .preface-route .step:nth-child(n+7) { border-bottom: 0; }
     .preface-route .step:nth-child(7) { grid-column: span 2; }
+    .why-grid { grid-template-columns: 280px minmax(0, 1fr); gap: 3vw; }
+    .why-cards { grid-template-columns: 1fr; gap: 2.4vh; }
+    .why-verdict { grid-template-columns: 1fr; gap: 2.4vh; }
   }
 
   @media (max-width: 720px) {
-    .lab-inner { padding: 9vh 0 6vh; }
-    .lab-shell { grid-template-columns: 1fr; gap: 2.2vh; margin-top: 3vh; }
-    .lab-tabs { flex-direction: row; gap: 16px; overflow-x: auto; border-bottom: 1px solid var(--line); }
-    .lab-tab { border-bottom: 0; padding: 8px 0; white-space: nowrap; font-size: 12px; }
-    .lab-tabs-note { display: none; }
-    .lab-panel-head { grid-template-columns: 1fr; gap: 6px; }
-    .lab-panel canvas { height: 220px; }
-    .lab-controls { gap: 10px 16px; }
-    .lab-controls input[type="range"] { width: 96px; }
-    .lab-readout { min-width: 100%; }
-    .monty-doors { gap: 8px; }
+    .lab-inner { padding: 8vh 0 6vh; }
+    .lab-head h2 { font-size: clamp(1.9rem, 8.4vw, 2.8rem); }
+    .why-grid { grid-template-columns: 1fr; gap: 4vh; margin-top: 3vh; }
+    .why-asset { font-size: 2.8rem; }
+    .why-actions .btn { font-size: 10px; padding: 10px 4px; }
+    .why-chart canvas { height: 240px; }
+    .why-legend { gap: 10px 16px; }
+    .why-legend .why-scale { margin-left: 0; width: 100%; }
+    .why-explain { margin-top: 6vh; padding-top: 4vh; }
+    .why-cards { grid-template-columns: 1fr; gap: 3vh; }
+    .why-verdict { grid-template-columns: 1fr; gap: 3vh; margin-top: 4vh; }
+    .why-next { font-size: 9px; }
 
     body { font-size: 15px; }
 
@@ -2004,7 +2211,7 @@
   <a href="#game" data-label="游戏" aria-label="游戏"></a>
   <a href="#lives" data-label="人生" aria-label="人生"></a>
   <a href="#split" data-label="分裂" aria-label="分裂"></a>
-  <a href="#lab" data-label="实验室" aria-label="实验室"></a>
+  <a href="#lab" data-label="拆解" aria-label="拆解"></a>
   <a href="#lever" data-label="杠杆" aria-label="杠杆"></a>
   <a href="#barriers" data-label="吸收壁" aria-label="吸收壁"></a>
   <a href="#statistic" data-label="统计量" aria-label="统计量"></a>
@@ -2064,9 +2271,9 @@
         </div>
         <div class="step">
           <span class="num">04</span>
-          <p class="name">进概率实验室</p>
-          <p class="desc">大数定律、中心极限定理、贝叶斯、蒙提霍尔；四个实验，随便玩。</p>
-          <div class="meta"><span>四个经典实验</span><span>第 05 幕</span></div>
+          <p class="name">把硬币拆开</p>
+          <p class="desc">一正一反为什么只剩 0.9？亲手点几次，再看乘法怎么把差距拉开。</p>
+          <div class="meta"><span>乘法 · 几何平均</span><span>第 05 幕</span></div>
         </div>
         <div class="step">
           <span class="num">05</span>
@@ -2259,92 +2466,109 @@
     </div>
   </section>
 
-  <!-- 05 / lab -->
+  <!-- 05 / why -->
   <section id="lab" class="scene lab" data-chapter="05">
     <div class="inner lab-inner">
       <div class="lab-head">
-        <p class="eyebrow reveal">05 / The Lab</p>
-        <h2 class="reveal" style="--d:.06s">概率的四种看法。</h2>
-        <p class="lead reveal" style="--d:.12s">四个实验，四种概率论看世界的方式。点标签，换一个。</p>
+        <p class="eyebrow reveal">05 / The Mechanism</p>
+        <h2 class="reveal" style="--d:.06s">把一次抛掷，<br>拆成两半。</h2>
+        <p class="lead reveal" style="--d:.12s">+50% 和 −40% 看起来对称。但一正一反之后，你的 1.00× 只剩 0.90×。为什么平均在涨，大多数人却在跌？</p>
       </div>
 
-      <div class="lab-shell">
-        <nav class="lab-tabs" aria-label="概率实验">
-          <button class="lab-tab active" type="button" data-lab="lln"><span>01</span>大数定律</button>
-          <button class="lab-tab" type="button" data-lab="clt"><span>02</span>中心极限定理</button>
-          <button class="lab-tab" type="button" data-lab="bayes"><span>03</span>贝叶斯</button>
-          <button class="lab-tab" type="button" data-lab="monty"><span>04</span>蒙提霍尔</button>
-          <p class="lab-tabs-note">四种看法，同一个结论：<br>概率描述群体，命运只走一条。</p>
-        </nav>
+      <div class="why-grid">
+        <aside class="why-console reveal" style="--d:.18s">
+          <p class="why-label">你的资产</p>
+          <p class="why-asset"><span id="whyAsset">1.00</span><span>×</span></p>
 
-        <div class="lab-stage">
-          <div class="lab-panel active" data-panel="lln">
-            <div class="lab-panel-head">
-              <p class="lab-q">抛得越多，正面比例会越接近 50% 吗？</p>
-              <p class="lab-note">大数定律：样本均值会收敛到期望；但你的钱不会。</p>
-            </div>
-            <canvas id="llnCanvas" aria-label="正面比例随抛掷次数收敛的折线图"></canvas>
-            <div class="lab-controls">
-              <label>正面概率 <strong id="llnPVal">50%</strong>
-                <input type="range" id="llnP" min="10" max="90" value="50" step="1" aria-label="正面概率">
-              </label>
-              <button class="btn" id="llnRun" type="button">抛 1,000 次</button>
-              <button class="btn btn-ghost" id="llnReset" type="button">重置</button>
-              <p class="lab-readout" id="llnReadout">按「抛 1,000 次」，看比例怎么收敛。</p>
-            </div>
+          <div class="why-stats">
+            <div><span>正面</span><strong id="whyHeads">0</strong></div>
+            <div><span>反面</span><strong id="whyTails">0</strong></div>
+            <div><span>总次数</span><strong id="whyTotal">0</strong></div>
           </div>
 
-          <div class="lab-panel" data-panel="clt">
-            <div class="lab-panel-head">
-              <p class="lab-q">为什么「平均」会变成钟形曲线？</p>
-              <p class="lab-note">中心极限定理：不管原来的分布是什么，样本均值会趋近正态。</p>
-            </div>
-            <canvas id="cltCanvas" aria-label="掷骰子点数和的分布直方图"></canvas>
-            <div class="lab-controls">
-              <label>每轮掷几颗骰子 <strong id="cltNVal">2</strong>
-                <input type="range" id="cltN" min="1" max="12" value="2" step="1" aria-label="骰子数量">
-              </label>
-              <button class="btn" id="cltRun" type="button">掷 10,000 次</button>
-              <p class="lab-readout" id="cltReadout">n=2 时还是三角形；n=12 时已经很像钟形。</p>
-            </div>
+          <div class="why-actions">
+            <button class="btn" id="whyFlip" type="button">抛一次</button>
+            <button class="btn btn-ghost" id="whyFlip10" type="button">抛 10 次</button>
+            <button class="btn btn-ghost" id="whyFlip100" type="button">抛 100 次</button>
           </div>
 
-          <div class="lab-panel" data-panel="bayes">
-            <div class="lab-panel-head">
-              <p class="lab-q">99% 准确的检测，阳性后真的病了吗？</p>
-              <p class="lab-note">贝叶斯：决定后验概率的不只是准确率，还有基础患病率。</p>
+          <div class="why-ledger">
+            <div class="why-ledger-head">
+              <p class="why-label">自己点一正一反</p>
+              <div class="why-mode" role="group" aria-label="账本写法">
+                <button class="active" type="button" data-why-mode="mul">乘法</button>
+                <button type="button" data-why-mode="log">对数</button>
+              </div>
             </div>
-            <canvas id="bayesCanvas" aria-label="一万个人的检测结果网格"></canvas>
-            <div class="lab-controls">
-              <label>患病率 <strong id="bayesPrevVal">1%</strong>
-                <input type="range" id="bayesPrev" min="1" max="50" value="1" step="1" aria-label="患病率">
-              </label>
-              <label>检测准确率 <strong id="bayesAccVal">99%</strong>
-                <input type="range" id="bayesAcc" min="90" max="99" value="99" step="1" aria-label="检测准确率">
-              </label>
-              <p class="lab-readout" id="bayesReadout">阳性的人里，真正有病的只有一半。</p>
+            <div class="why-manual">
+              <button class="why-side up" id="whyUp" type="button"><span>正面</span>×1.5</button>
+              <button class="why-side down" id="whyDown" type="button"><span>反面</span>×0.6</button>
             </div>
+            <p class="why-chain" id="whyChain">1.00</p>
+            <p class="why-chain-sub" id="whyChainSub"></p>
+            <p class="why-hint" id="whyHint">顺序无所谓。点一次正、一次反试试。</p>
           </div>
 
-          <div class="lab-panel" data-panel="monty">
-            <div class="lab-panel-head">
-              <p class="lab-q">三扇门，主持人打开一扇山羊，你换不换？</p>
-              <p class="lab-note">条件概率：主持人知道答案，他打开的门不是随机的。</p>
-            </div>
-            <div class="monty-doors" id="montyDoors">
-              <button class="monty-door" type="button" data-door="0"><span>1</span></button>
-              <button class="monty-door" type="button" data-door="1"><span>2</span></button>
-              <button class="monty-door" type="button" data-door="2"><span>3</span></button>
-            </div>
-            <div class="lab-controls monty-controls">
-              <button class="btn" id="montySwitch" type="button" disabled>换一扇</button>
-              <button class="btn btn-ghost" id="montyStay" type="button" disabled>不换</button>
-              <button class="btn" id="montyReset" type="button">重开</button>
-              <p class="lab-readout" id="montyReadout">先选一扇门。</p>
-            </div>
-            <p class="monty-score" id="montyScore">换：0 胜 / 0 局　　不换：0 胜 / 0 局</p>
+          <div class="why-foot">
+            <p class="why-log" id="whyLog">对数累计 0.000　每步几何平均 ×—</p>
+            <button class="btn link" id="whyReset" type="button">清零</button>
+          </div>
+        </aside>
+
+        <div class="why-chart reveal" style="--d:.24s">
+          <canvas id="whyCanvas" aria-label="你的财富路径，以及平均值与典型路径两条参考线"></canvas>
+          <div class="why-legend">
+            <span><i class="you"></i>你的路径</span>
+            <span><i class="mean"></i>平均值 1.05^n</span>
+            <span><i class="typical"></i>典型路径 0.9^(n/2)</span>
+            <span class="why-scale">纵轴：财富，对数刻度</span>
+          </div>
+          <p class="why-cue">你的路径只是其中一条。往下看：为什么它和平均值分开了。<span>↓</span></p>
+        </div>
+      </div>
+
+      <div class="why-explain">
+        <div class="why-explain-head">
+          <p class="eyebrow">The Reason</p>
+          <h3>为什么？</h3>
+          <p class="why-explain-lead" id="whyLead">每一条路径，都只是无数条可能路径中的一条。下面三件事，决定了它为什么大概率越走越低。</p>
+        </div>
+
+        <div class="why-cards">
+          <article class="why-card">
+            <span class="why-card-num">01</span>
+            <h4>上涨和下跌，不对称。</h4>
+            <p class="why-formula">1.00 × 1.50 × 0.60 = <em>0.90</em></p>
+            <p>+50% 之后，只要 −33.3% 就回到原点；但 −40% 之后，要 +66.7% 才回得去。一正一反，不管谁先谁后，都只剩 0.90。</p>
+          </article>
+
+          <article class="why-card">
+            <span class="why-card-num">02</span>
+            <h4>乘法世界，用几何平均。</h4>
+            <p class="why-formula">0.90^(1/2) = 0.9487<br>0.5·ln1.5 + 0.5·ln0.6 = <em>−0.053</em></p>
+            <p>每步几何平均 0.9487；100 次就是 0.90^50 ≈ 0.005。取对数后每步平均 −0.053——在加法世界里，它是负期望。</p>
+          </article>
+
+          <article class="why-card">
+            <span class="why-card-num">03</span>
+            <h4>算术平均，被尾部拉高。</h4>
+            <p class="why-formula">(1.50 + 0.60) / 2 = 1.05 → 1.05^100 ≈ <em>131.5</em></p>
+            <p>它把 4,000 条路径的终点相加；少数暴富路径撑起了平均值。它算的是平行世界，不是你这一条。</p>
+          </article>
+        </div>
+
+        <p class="why-answer">因为期望值在<b>加法世界</b>里算，<br>你的钱在<b>乘法世界</b>里走。</p>
+
+        <div class="why-verdict">
+          <p class="why-verdict-main">大数定律保证的是<b>频率</b>收敛，<br>不是<b>财富</b>收敛。</p>
+          <div class="why-drag">
+            <span>波动拖累</span>
+            <strong>≈ σ² / 2 ≈ 10.1%</strong>
+            <p>算术上每步 +5%，几何上每步 −5.13%。波动越大，两者离得越远。</p>
           </div>
         </div>
+
+        <p class="why-next">你改不了这个乘法结构。<a href="#lever">下一节，改下注 ↓</a></p>
       </div>
     </div>
   </section>
@@ -3461,30 +3685,24 @@
     c.stroke();
   }
 
-  /* ---------------- lab ---------------- */
+  /* ---------------- why ---------------- */
 
-  var labTabs = $$('.lab-tab');
-  var labPanels = $$('.lab-panel');
-  var activeLab = 'lln';
+  var WHY_MAX = 100;
+  var why = { w: 1, flips: [], heads: 0, tails: 0 };
+  var whyMode = 'mul';
 
-  function selectLab(name) {
-    activeLab = name;
-    labTabs.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-lab') === name); });
-    labPanels.forEach(function (p) { p.classList.toggle('active', p.getAttribute('data-panel') === name); });
-    drawLab();
+  function whyFmt(v) {
+    if (!isFinite(v)) return '∞';
+    if (v >= 10000) return v.toExponential(2).replace('e+', 'e');
+    if (v >= 100) return v.toFixed(0);
+    if (v >= 10) return v.toFixed(1);
+    if (v >= 1) return v.toFixed(2);
+    if (v >= 0.01) return v.toFixed(3);
+    if (v >= 0.0001) return v.toFixed(4);
+    return v.toExponential(2);
   }
 
-  labTabs.forEach(function (b) {
-    b.addEventListener('click', function () { selectLab(b.getAttribute('data-lab')); });
-  });
-
-  function drawLab() {
-    if (activeLab === 'lln') drawLLN();
-    else if (activeLab === 'clt') drawCLT();
-    else if (activeLab === 'bayes') drawBayes();
-  }
-
-  function setupLabCanvas(c) {
+  function whySetup(c) {
     if (!c) return null;
     var w = c.clientWidth, h = c.clientHeight;
     if (!w || !h) return null;
@@ -3497,330 +3715,225 @@
     return { g: g, w: w, h: h };
   }
 
-  /* LLN */
-  var llnP = 0.5;
-  var llnSeries = [];
-  var LLN_N = 1000;
+  function whyStep(up) {
+    if (why.flips.length >= WHY_MAX) return;
+    why.w *= up ? 1.5 : 0.6;
+    why.flips.push(up ? 1 : 0);
+    if (up) why.heads++; else why.tails++;
+    whySync();
+  }
 
-  function drawLLN() {
-    var ctx = setupLabCanvas($('#llnCanvas'));
-    if (!ctx) return;
-    var g = ctx.g, w = ctx.w, h = ctx.h;
-    var pad = { l: 44, r: 16, t: 16, b: 26 };
-    var x = function (i) { return pad.l + (i / LLN_N) * (w - pad.l - pad.r); };
-    var y = function (v) { return pad.t + (1 - v) * (h - pad.t - pad.b); };
+  function whyRandom(n) {
+    for (var i = 0; i < n && why.flips.length < WHY_MAX; i++) {
+      var up = Math.random() < 0.5;
+      why.w *= up ? 1.5 : 0.6;
+      why.flips.push(up ? 1 : 0);
+      if (up) why.heads++; else why.tails++;
+    }
+    whySync();
+  }
 
-    g.strokeStyle = 'rgba(244,241,234,.08)';
-    g.lineWidth = 1;
-    [0, .25, .5, .75, 1].forEach(function (v) {
-      g.beginPath(); g.moveTo(pad.l, y(v)); g.lineTo(w - pad.r, y(v)); g.stroke();
+  function whyReset() {
+    why.w = 1;
+    why.flips = [];
+    why.heads = 0;
+    why.tails = 0;
+    whySync();
+  }
+
+  function whySync() {
+    var n = why.flips.length;
+    $('#whyAsset').textContent = whyFmt(why.w);
+    $('#whyHeads').textContent = why.heads;
+    $('#whyTails').textContent = why.tails;
+    $('#whyTotal').textContent = n;
+
+    var tail = why.flips.slice(-4);
+    var chain = '';
+    var sub = '';
+
+    if (whyMode === 'mul') {
+      var factors = tail.map(function (f) { return f ? '× 1.50' : '× 0.60'; });
+      chain = '1.00 ';
+      if (n > 4) chain += '… ';
+      chain += factors.join(' ');
+      if (n === 0) chain = '1.00';
+      else chain += ' = ' + whyFmt(why.w);
+    } else {
+      var logs = tail.map(function (f) { return f ? '+0.405' : '−0.511'; });
+      if (n === 0) {
+        chain = '0.000';
+      } else {
+        var total = Math.log(why.w).toFixed(3);
+        chain = n <= 4 ? '0.000 ' + logs.join(' ') : '… ' + logs.join(' ') + '　Σ';
+        chain += ' = ' + total;
+        sub = 'e^(' + total + ') = ' + whyFmt(why.w);
+      }
+    }
+
+    $('#whyChain').textContent = chain;
+    $('#whyChainSub').textContent = sub;
+
+    var hint = $('#whyHint');
+    hint.classList.remove('hot');
+    if (n === 0) {
+      hint.textContent = '顺序无所谓。点一次正、一次反试试。';
+    } else if (n >= WHY_MAX) {
+      hint.textContent = '100 次抛满了。清零，再来一条路径。';
+      hint.classList.add('hot');
+    } else if (why.heads > 0 && why.tails > 0 && n === 2) {
+      hint.textContent = '一正一反：0.90，不是 1.00。';
+      hint.classList.add('hot');
+    } else if (why.heads === n) {
+      hint.textContent = '你一直在涨。点一次反面。';
+      hint.classList.add('hot');
+    } else if (why.tails === n) {
+      hint.textContent = '你一直在跌。点一次正面。';
+      hint.classList.add('hot');
+    } else {
+      hint.textContent = '继续抛，或者直接抛满 100 次。';
+    }
+
+    if (n === 0) {
+      $('#whyLog').textContent = '对数累计 0.000　每步几何平均 ×—';
+    } else {
+      var lg = Math.log(why.w);
+      $('#whyLog').textContent = '对数累计 ' + lg.toFixed(3) + '　每步几何平均 ×' + Math.exp(lg / n).toFixed(4);
+    }
+
+    var done = n >= WHY_MAX;
+    ['#whyFlip', '#whyFlip10', '#whyFlip100', '#whyUp', '#whyDown'].forEach(function (sel) {
+      $(sel).disabled = done;
     });
 
-    g.fillStyle = 'rgba(244,241,234,.32)';
-    g.font = '9px Consolas, monospace';
-    g.textAlign = 'right';
-    [0, .25, .5, .75, 1].forEach(function (v) { g.fillText(Math.round(v * 100) + '%', pad.l - 8, y(v) + 3); });
+    $('#whyLead').textContent = n > 0
+      ? '你刚抛出的 ' + whyFmt(why.w) + '×，只是无数条可能路径中的一条。下面三件事，决定了它为什么大概率越走越低。'
+      : '每一条路径，都只是无数条可能路径中的一条。下面三件事，决定了它为什么大概率越走越低。';
 
-    g.save();
-    g.strokeStyle = 'rgba(244,241,234,.4)';
-    g.setLineDash([4, 5]);
-    g.beginPath(); g.moveTo(pad.l, y(llnP)); g.lineTo(w - pad.r, y(llnP)); g.stroke();
-    g.restore();
-
-    if (llnSeries.length > 1) {
-      g.save();
-      g.strokeStyle = '#ff4a3d';
-      g.lineWidth = 1.8;
-      g.shadowColor = 'rgba(255,74,61,.45)';
-      g.shadowBlur = 8;
-      g.beginPath();
-      llnSeries.forEach(function (v, i) {
-        var xx = x(i), yy = y(v);
-        if (i === 0) g.moveTo(xx, yy); else g.lineTo(xx, yy);
-      });
-      g.stroke();
-      g.restore();
-      var last = llnSeries[llnSeries.length - 1];
-      g.fillStyle = '#fff';
-      g.beginPath(); g.arc(x(LLN_N), y(last), 3, 0, Math.PI * 2); g.fill();
-    }
-
-    g.fillStyle = 'rgba(244,241,234,.28)';
-    g.font = '9px Consolas, monospace';
-    g.textAlign = 'center';
-    [0, 250, 500, 750, 1000].forEach(function (i) { g.fillText(i, x(i), h - 8); });
+    whyDraw();
   }
 
-  function runLLN() {
-    var heads = 0;
-    var arr = [0];
-    for (var i = 1; i <= LLN_N; i++) {
-      if (Math.random() < llnP) heads++;
-      arr.push(heads / i);
-    }
-    llnSeries = arr;
-    drawLLN();
-    var fin = arr[LLN_N];
-    $('#llnReadout').innerHTML = '1,000 次后：正面 <em>' + (fin * 100).toFixed(1) + '%</em>；期望 ' + (llnP * 100).toFixed(0) + '%。';
-  }
-
-  $('#llnP').addEventListener('input', function () {
-    llnP = Number(this.value) / 100;
-    $('#llnPVal').textContent = this.value + '%';
-    llnSeries = [];
-    $('#llnReadout').textContent = '按「抛 1,000 次」，看比例怎么收敛。';
-    drawLLN();
-  });
-  $('#llnRun').addEventListener('click', runLLN);
-  $('#llnReset').addEventListener('click', function () {
-    llnSeries = [];
-    $('#llnReadout').textContent = '按「抛 1,000 次」，看比例怎么收敛。';
-    drawLLN();
-  });
-
-  /* CLT */
-  var cltN = 2;
-  var cltCounts = null;
-
-  function drawCLT() {
-    var ctx = setupLabCanvas($('#cltCanvas'));
+  function whyDraw() {
+    var ctx = whySetup($('#whyCanvas'));
     if (!ctx) return;
     var g = ctx.g, w = ctx.w, h = ctx.h;
-    var pad = { l: 40, r: 16, t: 16, b: 26 };
-    var n = cltN;
-    var min = n, max = 6 * n;
-    var bins = max - min + 1;
-    var maxCount = 1;
-    if (cltCounts) {
-      for (var k = 0; k < cltCounts.length; k++) maxCount = Math.max(maxCount, cltCounts[k]);
-    }
+    var pad = { l: 62, r: 18, t: 28, b: 30 };
     var plotW = w - pad.l - pad.r;
     var plotH = h - pad.t - pad.b;
-    var bw = plotW / bins;
+    var yMin = -3.4, yMax = 2.5;
+    var xOf = function (i) { return pad.l + (i / WHY_MAX) * plotW; };
+    var yOf = function (v) {
+      var t = (v - yMin) / (yMax - yMin);
+      t = Math.max(0, Math.min(1, t));
+      return h - pad.b - t * plotH;
+    };
 
-    g.strokeStyle = 'rgba(244,241,234,.08)';
     g.lineWidth = 1;
-    [0, .25, .5, .75, 1].forEach(function (v) {
-      var yy = pad.t + (1 - v) * plotH;
-      g.beginPath(); g.moveTo(pad.l, yy); g.lineTo(w - pad.r, yy); g.stroke();
+    g.strokeStyle = 'rgba(244,241,234,.08)';
+    g.fillStyle = 'rgba(244,241,234,.3)';
+    g.font = '9px "Cascadia Mono", Consolas, monospace';
+    g.textAlign = 'right';
+    [[-3, '0.001×'], [-2, '0.01×'], [-1, '0.1×'], [0, '1×'], [1, '10×'], [2, '100×']].forEach(function (row) {
+      var y = yOf(row[0]);
+      g.beginPath(); g.moveTo(pad.l, y); g.lineTo(w - pad.r, y); g.stroke();
+      g.fillText(row[1], pad.l - 10, y + 3);
     });
 
-    if (cltCounts) {
-      for (var i = 0; i < bins; i++) {
-        var hh = (cltCounts[i] / maxCount) * plotH;
-        g.fillStyle = 'rgba(244,241,234,.2)';
-        g.fillRect(pad.l + i * bw + 1, h - pad.b - hh, Math.max(1, bw - 2), hh);
-      }
+    g.textAlign = 'center';
+    [0, 25, 50, 75, 100].forEach(function (t) {
+      g.fillText(t, xOf(t), h - 8);
+    });
 
-      var mean = 3.5 * n;
-      var sd = Math.sqrt(n * 35 / 12);
-      // 把概率密度换算成「10,000 次里大约多少次」，再按柱子的比例尺画。
-      var scale = (10000 / maxCount) * plotH;
-      g.save();
+    g.save();
+    g.beginPath(); g.rect(pad.l, pad.t - 4, plotW, plotH + 8); g.clip();
+
+    g.strokeStyle = 'rgba(244,241,234,.5)';
+    g.lineWidth = 1;
+    g.beginPath();
+    for (var t = 0; t <= WHY_MAX; t++) {
+      var my = yOf(t * Math.log10(1.05));
+      if (t === 0) g.moveTo(xOf(t), my); else g.lineTo(xOf(t), my);
+    }
+    g.stroke();
+
+    g.save();
+    g.setLineDash([3, 4]);
+    g.strokeStyle = 'rgba(244,241,234,.38)';
+    g.beginPath();
+    for (var tt = 0; tt <= WHY_MAX; tt++) {
+      var ty = yOf(tt * 0.5 * Math.log10(0.9));
+      if (tt === 0) g.moveTo(xOf(tt), ty); else g.lineTo(xOf(tt), ty);
+    }
+    g.stroke();
+    g.restore();
+
+    if (why.flips.length) {
       g.beginPath();
-      g.rect(pad.l, pad.t - 2, plotW, plotH + 2);
-      g.clip();
+      g.moveTo(xOf(0), yOf(0));
+      var lv = 0;
+      for (var i = 0; i < why.flips.length; i++) {
+        lv += Math.log10(why.flips[i] ? 1.5 : 0.6);
+        g.lineTo(xOf(i + 1), yOf(lv));
+      }
       g.strokeStyle = '#ff4a3d';
       g.lineWidth = 2;
-      g.beginPath();
-      for (var s = min; s <= max; s += 0.05) {
-        var dens = Math.exp(-0.5 * Math.pow((s - mean) / sd, 2)) / (sd * Math.sqrt(2 * Math.PI));
-        var xx = pad.l + ((s - min) / bins) * plotW;
-        var yy = h - pad.b - dens * scale;
-        if (s === min) g.moveTo(xx, yy); else g.lineTo(xx, yy);
-      }
+      g.shadowColor = 'rgba(255,74,61,.5)';
+      g.shadowBlur = 10;
       g.stroke();
-      g.restore();
+      g.shadowBlur = 0;
 
-      g.fillStyle = 'rgba(255,74,61,.75)';
-      g.font = '9px Consolas, monospace';
-      g.textAlign = 'right';
-      g.fillText('正态近似 —', w - pad.r - 6, pad.t + 8);
-    }
+      var endX = xOf(why.flips.length);
+      var endY = yOf(lv);
+      g.fillStyle = '#fff';
+      g.beginPath(); g.arc(endX, endY, 3.2, 0, Math.PI * 2); g.fill();
 
-    g.fillStyle = 'rgba(244,241,234,.28)';
-    g.font = '9px Consolas, monospace';
-    g.textAlign = 'center';
-    [min, Math.round((min + max) / 2), max].forEach(function (v) {
-      g.fillText(v, pad.l + ((v - min) / bins) * plotW, h - 8);
-    });
-    g.textAlign = 'left';
-    g.fillStyle = 'rgba(244,241,234,.32)';
-    g.fillText('n = ' + n, pad.l, pad.t + 8);
-  }
-
-  function runCLT() {
-    var samples = 10000;
-    var n = cltN;
-    var bins = 6 * n - n + 1;
-    var counts = [];
-    for (var i = 0; i < bins; i++) counts.push(0);
-    for (var s = 0; s < samples; s++) {
-      var sum = 0;
-      for (var d = 0; d < n; d++) sum += 1 + Math.floor(Math.random() * 6);
-      counts[sum - n]++;
-    }
-    cltCounts = counts;
-    drawCLT();
-    var mean = 3.5 * n;
-    var sd = Math.sqrt(n * 35 / 12);
-    $('#cltReadout').innerHTML = 'n = ' + n + '：均值 <em>' + mean.toFixed(1) + '</em>，标准差 <em>' + sd.toFixed(2) + '</em>。掷 10,000 次。';
-  }
-
-  $('#cltN').addEventListener('input', function () {
-    cltN = Number(this.value);
-    $('#cltNVal').textContent = cltN;
-    cltCounts = null;
-    drawCLT();
-  });
-  $('#cltRun').addEventListener('click', runCLT);
-
-  /* Bayes */
-  var bayesPrev = 1;
-  var bayesAcc = 99;
-
-  // 一万个「人」的固定乱序：让患病者散在全场，而不是挤成一条线。
-  var bayesOrder = (function () {
-    var rnd = mulberry32(20261108);
-    var arr = new Array(10000);
-    for (var i = 0; i < 10000; i++) arr[i] = i;
-    for (var j = 9999; j > 0; j--) {
-      var k = Math.floor(rnd() * (j + 1));
-      var tmp = arr[j]; arr[j] = arr[k]; arr[k] = tmp;
-    }
-    return arr;
-  })();
-
-  function drawBayes() {
-    var ctx = setupLabCanvas($('#bayesCanvas'));
-    if (!ctx) return;
-    var g = ctx.g, w = ctx.w, h = ctx.h;
-    var total = 10000;
-    var diseased = Math.round(total * bayesPrev / 100);
-    var acc = bayesAcc / 100;
-    var tp = Math.round(diseased * acc);
-    var fp = Math.round((total - diseased) * (1 - acc));
-
-    // 按画布比例自动选列数，让每个点接近正圆、行列间距接近相等。
-    var cols = Math.max(40, Math.round(Math.sqrt(total * (w / h))));
-    var rows = Math.ceil(total / cols);
-    var cellW = w / cols, cellH = h / rows;
-    var r = Math.max(1, Math.min(cellW, cellH) * 0.34);
-
-    for (var i = 0; i < total; i++) {
-      var pos = bayesOrder[i];
-      var cx = ((pos % cols) + 0.5) * cellW;
-      var cy = (Math.floor(pos / cols) + 0.5) * cellH;
-      if (i < tp) g.fillStyle = '#ff4a3d';
-      else if (i < diseased) g.fillStyle = 'rgba(255,74,61,.32)';
-      else if (i < diseased + fp) g.fillStyle = 'rgba(255,150,70,.85)';
-      else g.fillStyle = 'rgba(244,241,234,.13)';
-      g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
-    }
-
-    var positive = tp + fp;
-    var posterior = positive ? tp / positive * 100 : 0;
-    $('#bayesReadout').innerHTML = '阳性 <em>' + positive + '</em> 人 → 真有病 <em>' + tp + '</em> 人（' + posterior.toFixed(1) + '%）。<br>红 = 真有病，橙 = 假阳性，灰 = 健康。';
-  }
-
-  $('#bayesPrev').addEventListener('input', function () {
-    bayesPrev = Number(this.value);
-    $('#bayesPrevVal').textContent = bayesPrev + '%';
-    drawBayes();
-  });
-  $('#bayesAcc').addEventListener('input', function () {
-    bayesAcc = Number(this.value);
-    $('#bayesAccVal').textContent = bayesAcc + '%';
-    drawBayes();
-  });
-
-  /* Monty */
-  var montyCar = 0;
-  var montyChosen = null;
-  var montyOpened = null;
-  var montyPhase = 'pick';
-  var montySwitchWins = 0, montySwitchGames = 0;
-  var montyStayWins = 0, montyStayGames = 0;
-
-  function montyNewGame() {
-    montyCar = Math.floor(Math.random() * 3);
-    montyChosen = null;
-    montyOpened = null;
-    montyPhase = 'pick';
-    $$('.monty-door').forEach(function (d) {
-      d.classList.remove('chosen', 'opened', 'car', 'goat');
-      d.querySelector('span').textContent = Number(d.getAttribute('data-door')) + 1;
-      d.disabled = false;
-    });
-    $('#montySwitch').disabled = true;
-    $('#montyStay').disabled = true;
-    $('#montyReadout').textContent = '先选一扇门。';
-  }
-
-  function montyPick(i) {
-    if (montyPhase !== 'pick') return;
-    montyChosen = i;
-    var candidates = [0, 1, 2].filter(function (d) { return d !== i && d !== montyCar; });
-    montyOpened = candidates[Math.floor(Math.random() * candidates.length)];
-    montyPhase = 'choose';
-    $$('.monty-door').forEach(function (d) {
-      var idx = Number(d.getAttribute('data-door'));
-      d.classList.toggle('chosen', idx === i);
-      if (idx === montyOpened) {
-        d.classList.add('opened', 'goat');
-        d.querySelector('span').textContent = '山羊';
-      }
-      d.disabled = true;
-    });
-    $('#montySwitch').disabled = false;
-    $('#montyStay').disabled = false;
-    $('#montyReadout').textContent = '主持人打开了 ' + (montyOpened + 1) + ' 号门，是山羊。换，还是不换？';
-  }
-
-  function montyFinish(doSwitch) {
-    if (montyPhase !== 'choose') return;
-    var finalDoor = montyChosen;
-    if (doSwitch) {
-      for (var d = 0; d < 3; d++) {
-        if (d !== montyChosen && d !== montyOpened) finalDoor = d;
+      if (why.flips.length <= 12) {
+        g.fillStyle = '#ff4a3d';
+        var pv = 0;
+        for (var j = 0; j < why.flips.length; j++) {
+          pv += Math.log10(why.flips[j] ? 1.5 : 0.6);
+          g.beginPath(); g.arc(xOf(j + 1), yOf(pv), 2.2, 0, Math.PI * 2); g.fill();
+        }
+        g.textAlign = 'left';
+        g.font = '10px "Cascadia Mono", Consolas, monospace';
+        var endLabel = whyFmt(why.w) + '×';
+        g.fillStyle = 'rgba(5,5,6,.92)';
+        g.fillRect(endX + 4, endY - 22, endLabel.length * 6.4 + 8, 18);
+        g.fillStyle = 'rgba(244,241,234,.92)';
+        g.fillText(endLabel, endX + 9, endY - 8);
       }
     }
-    var won = finalDoor === montyCar;
-    if (doSwitch) {
-      montySwitchGames++;
-      if (won) montySwitchWins++;
-    } else {
-      montyStayGames++;
-      if (won) montyStayWins++;
+    g.restore();
+
+    g.font = '9px "Cascadia Mono", Consolas, monospace';
+    g.textAlign = 'right';
+    g.fillStyle = 'rgba(244,241,234,.68)';
+    g.fillText('平均 131.5×', w - pad.r - 2, yOf(2.118) + 14);
+    g.fillStyle = 'rgba(244,241,234,.5)';
+    g.fillText('典型 0.005×', w - pad.r - 2, yOf(-2.288) + 14);
+
+    if (!why.flips.length) {
+      g.textAlign = 'left';
+      g.fillStyle = 'rgba(244,241,234,.4)';
+      g.font = '11px "PingFang SC", "Microsoft YaHei", sans-serif';
+      g.fillText('抛一次，看你的线往哪边走。', pad.l + 4, pad.t + 16);
     }
-    $$('.monty-door').forEach(function (el) {
-      var idx = Number(el.getAttribute('data-door'));
-      el.disabled = true;
-      el.classList.remove('opened', 'goat');
-      el.classList.toggle('chosen', idx === finalDoor);
-      if (idx === montyCar) {
-        el.classList.add('car');
-        el.querySelector('span').textContent = '车';
-      } else if (idx !== finalDoor) {
-        el.classList.add('goat');
-        el.querySelector('span').textContent = '山羊';
-      }
-    });
-    montyPhase = 'done';
-    $('#montySwitch').disabled = true;
-    $('#montyStay').disabled = true;
-    var rate = function (w, n) { return n ? (w / n * 100).toFixed(0) + '%' : '—'; };
-    $('#montyReadout').textContent = (won ? '你赢了。' : '你输了。') + ' 换：' + (doSwitch ? '是' : '否') + '。';
-    $('#montyScore').textContent = '换：' + montySwitchWins + ' 胜 / ' + montySwitchGames + ' 局（' + rate(montySwitchWins, montySwitchGames) + '）　　不换：' + montyStayWins + ' 胜 / ' + montyStayGames + ' 局（' + rate(montyStayWins, montyStayGames) + '）';
   }
 
-  $$('.monty-door').forEach(function (d) {
-    d.addEventListener('click', function () { montyPick(Number(d.getAttribute('data-door'))); });
+  $('#whyFlip').addEventListener('click', function () { whyRandom(1); });
+  $('#whyFlip10').addEventListener('click', function () { whyRandom(10); });
+  $('#whyFlip100').addEventListener('click', function () { whyRandom(100); });
+  $('#whyUp').addEventListener('click', function () { whyStep(true); });
+  $('#whyDown').addEventListener('click', function () { whyStep(false); });
+  $$('.why-mode button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      whyMode = b.getAttribute('data-why-mode');
+      $$('.why-mode button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      whySync();
+    });
   });
-  $('#montySwitch').addEventListener('click', function () { montyFinish(true); });
-  $('#montyStay').addEventListener('click', function () { montyFinish(false); });
-  $('#montyReset').addEventListener('click', function () { montyNewGame(); });
-  montyNewGame();
+  $('#whyReset').addEventListener('click', whyReset);
+  whySync();
 
   /* ---------------- resize ---------------- */
 
@@ -3830,7 +3943,7 @@
     drawPaths();
     drawStatBg();
     drawLeverPaths(currentF);
-    drawLab();
+    whyDraw();
     measureBarriers();
     if (selectedPath) drawSelected(1);
     requestTick();
@@ -3865,7 +3978,7 @@
   setF(0.25, false);
   drawSpark();
   updateGameNote();
-  drawLab();
+  whyDraw();
   measureBarriers();
   requestTick();
 
